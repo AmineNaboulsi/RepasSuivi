@@ -6,15 +6,13 @@ export default function Home() {
   const [email, setEmail] = useState('');
   const [isAnimated, setIsAnimated] = useState(false);
   
-  // Trigger animation after page load
   useEffect(() => {
     setIsAnimated(true);
   }, []);
   
-  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In actual implementation, you would send this to your backend
+    
     console.log('Email submitted:', email);
     alert('Merci ! Vous serez informé du lancement.');
     setEmail('');
@@ -28,7 +26,6 @@ export default function Home() {
       </Head>
       
       <main className="container mx-auto px-4 py-12 relative z-10">
-        {/* Design Elements */}
         <div className={`absolute top-1/4 left-0 w-64 h-64 bg-purple-500 rounded-full filter blur-3xl opacity-5 ${isAnimated ? 'animate-blob' : ''}`}></div>
         <div className={`absolute bottom-1/4 right-0 w-80 h-80 bg-blue-500 rounded-full filter blur-3xl opacity-5 ${isAnimated ? 'animate-blob animation-delay-2000' : ''}`}></div>
         <div className={`absolute top-1/2 left-1/3 w-72 h-72 bg-teal-500 rounded-full filter blur-3xl opacity-5 ${isAnimated ? 'animate-blob animation-delay-4000' : ''}`}></div>
