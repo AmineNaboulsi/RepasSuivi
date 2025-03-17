@@ -236,15 +236,6 @@ const RegisterPage = () => {
                   </span>
                 </div>
               )}
-          <div className="flex justify-center my-4">
-           <ReCAPTCHA
-            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
-            onChange={handleCaptchaChange}
-            ref={recaptchaRef}
-          />
-          </div>
-          {errors.captcha && <p className="text-red-500 text-xs text-center">{errors.captcha}</p>}
-          
           <div className="flex items-center">
             <input 
               id="terms" 
@@ -259,6 +250,15 @@ const RegisterPage = () => {
             </label>
           </div>
           {errors.terms && <p className="text-red-500 text-xs mt-1">{errors.terms}</p>}
+          
+          <div className="flex justify-center my-4">
+           <ReCAPTCHA
+            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+            onChange={handleCaptchaChange}
+            ref={recaptchaRef}
+          />
+          </div>
+          {errors.captcha && <p className="text-red-500 text-xs text-center">{errors.captcha}</p>}
           
           <div>
             <button 

@@ -196,7 +196,7 @@ const VerifyEmailContent = () => {
                 </button>
                 
                 <div className="mt-4">
-                  <Link href="/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                  <Link href="/auth/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
                     Return to login
                   </Link>
                 </div>
