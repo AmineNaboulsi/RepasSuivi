@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
-import { stringify } from 'querystring';
 
 interface FormData {
   name: string;
@@ -168,7 +167,7 @@ const RegisterPage = () => {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{" "}
-            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
               sign in to your existing account
             </Link>
           </p>
@@ -223,20 +222,7 @@ const RegisterPage = () => {
              
             </div>
           </div>
-          {formData.password && formData.password.length > 0 && formData.password.length < 8 && (
-                <div className="mt-1 flex items-center">
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div 
-                      className={`h-1.5 rounded-full ${formData.password.length < 4 ? 'bg-red-500' : formData.password.length < 8 ? 'bg-yellow-500' : 'bg-green-500'}`} 
-                      style={{ width: `${Math.min(100, (formData.password.length / 12) * 100)}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-gray-500 ml-2">
-                    {formData.password.length < 4 ? 'Weak' : formData.password.length < 8 ? 'Medium' : 'Strong'}
-                  </span>
-                </div>
-              )}
-          <div className="flex items-center">
+            <div className="flex items-center">
             <input 
               id="terms" 
               name="terms" 

@@ -12,30 +12,35 @@ const VerifyEmailContent = () => {
   const [isResending, setIsResending] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState('');
   
+
+
   useEffect(() => {
+
+    const handleVerify = async (token:string) => {
+      setIsVerifying(true);
+      try {
+         console.log(token)     
+        setVerificationStatus('success');
+        
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 3000);
+        
+      } catch {
+        setVerificationStatus('error');
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+
     const token = searchParams?.get('token');
     console.log(isVerifying)
     if (token) {
       handleVerify(token);
     }
-  }, [searchParams, isVerifying]);
+  }, [searchParams, isVerifying,router]);
   
-  const handleVerify = async (token:string) => {
-    setIsVerifying(true);
-    try {
-       console.log(token)     
-      setVerificationStatus('success');
-      
-      setTimeout(() => {
-        router.push('/auth/login');
-      }, 3000);
-      
-    } catch {
-      setVerificationStatus('error');
-    } finally {
-      setIsVerifying(false);
-    }
-  };
+
   
   const handleResendVerification = async () => {
     setIsResending(true);

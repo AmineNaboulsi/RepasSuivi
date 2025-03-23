@@ -3,6 +3,26 @@
 import React, { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, User, BarChart3, Award, Utensils, Plus, Clock } from 'lucide-react';
 
+interface Meal { 
+  id: number, 
+  type: string, 
+  time: string,
+  name: string, 
+  calories: number,
+  protein: number,
+  carbs: number,
+  fat: number,
+  items: string[]
+}
+interface dayType {
+  day: number,
+  date: string,
+  mealCount: number,
+  totalCalories: number,
+  weight?: number,
+  isToday: boolean
+}
+
 const RepasFollowupDashboard = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState('calendar'); 
@@ -125,19 +145,19 @@ const RepasFollowupDashboard = () => {
     ]
   };
   
-  const formatDate = (date) => {
+  const formatDate = (date:Date) => {
     return date.toISOString().split('T')[0];
   };
   
   const getMealsForSelectedDate = () => {
     const formattedDate = formatDate(currentDate);
-    return mealData[formattedDate] || [];
+    return mealData[formattedDate as keyof typeof mealData] || [];
   };
   
-  const calculateTotalCalories = (date) => {
+  const calculateTotalCalories = (date: string) => {
     const formattedDate = typeof date === 'string' ? date : formatDate(date);
-    const meals = mealData[formattedDate] || [];
-    return meals.reduce((total, meal) => total + meal.calories, 0);
+    const meals = mealData[formattedDate as keyof typeof mealData] || [];
+    return meals.reduce((total:number, meal) => total + meal.calories, 0);
   };
   
   const generateCalendarDays = () => {
@@ -150,18 +170,16 @@ const RepasFollowupDashboard = () => {
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
     
-    const days = [];
+    const days: (dayType | null)[] = [];
     
-    // Add empty cells for days before the 1st of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
     
-    // Add days of the month
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(year, month, i);
       const formattedDate = formatDate(date);
-      const meals = mealData[formattedDate] || [];
+      const meals = mealData[formattedDate as keyof typeof mealData] || [];
       const totalCalories = calculateTotalCalories(formattedDate);
       const weightEntry = userData.weightHistory.find(entry => entry.date === formattedDate);
       
@@ -178,20 +196,20 @@ const RepasFollowupDashboard = () => {
     return days;
   };
   
-  const navigateMonth = (direction) => {
+  const navigateMonth = (direction: number) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + direction);
     setCurrentDate(newDate);
   };
   
-  const selectDate = (day) => {
+  const selectDate = (day: dayType) => {
     if (day) {
       const newDate = new Date(day.date);
       setCurrentDate(newDate);
     }
   };
   
-  const renderMealCard = (meal) => {
+  const renderMealCard = (meal:Meal) => {
     return (
       <div key={meal.id} className="bg-white rounded-lg p-4 mb-4 shadow border-l-4 border-indigo-500">
         <div className="flex justify-between items-center mb-2">
@@ -220,7 +238,7 @@ const RepasFollowupDashboard = () => {
         
         <div className="text-xs text-gray-600">
           <div className="font-medium mb-1">Ingredients:</div>
-          <div>{meal.items.join(', ')}</div>
+          {/* <div>{meal.items.join(', ')}</div> */}
         </div>
       </div>
     );
@@ -228,9 +246,8 @@ const RepasFollowupDashboard = () => {
   
   const calculateDayProgress = () => {
     const todayMeals = getMealsForSelectedDate();
-    const totalCalories = todayMeals.reduce((sum, meal) => sum + meal.calories, 0);
+    const totalCalories = todayMeals.reduce((sum: number, meal) => sum + meal.calories, 0);
     const percentOfGoal = Math.min(Math.round((totalCalories / userData.dailyCalorieGoal) * 100), 100);
-    
     return {
       total: totalCalories,
       percent: percentOfGoal,
