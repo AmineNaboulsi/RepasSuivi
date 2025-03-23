@@ -4,11 +4,9 @@ import React, { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, User, BarChart3, Award, Utensils, Plus, Clock } from 'lucide-react';
 
 const RepasFollowupDashboard = () => {
-  // State for currently selected date and view
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState('calendar'); 
   
-  // Sample user data
   const userData = {
     name: "Sophie Martin",
     dailyCalorieGoal: 2100,
@@ -30,7 +28,6 @@ const RepasFollowupDashboard = () => {
     ]
   };
   
-  // Sample meal data
   const mealData = {
     '2025-03-15': [
       { 
@@ -128,25 +125,21 @@ const RepasFollowupDashboard = () => {
     ]
   };
   
-  // Format date as YYYY-MM-DD for looking up meal data
   const formatDate = (date) => {
     return date.toISOString().split('T')[0];
   };
   
-  // Get meals for the selected date
   const getMealsForSelectedDate = () => {
     const formattedDate = formatDate(currentDate);
     return mealData[formattedDate] || [];
   };
   
-  // Calculate total calories for a date
   const calculateTotalCalories = (date) => {
     const formattedDate = typeof date === 'string' ? date : formatDate(date);
     const meals = mealData[formattedDate] || [];
     return meals.reduce((total, meal) => total + meal.calories, 0);
   };
   
-  // Generate calendar days for the current month
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -185,14 +178,12 @@ const RepasFollowupDashboard = () => {
     return days;
   };
   
-  // Navigate to previous/next month
   const navigateMonth = (direction) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + direction);
     setCurrentDate(newDate);
   };
   
-  // Select a specific date
   const selectDate = (day) => {
     if (day) {
       const newDate = new Date(day.date);
@@ -200,7 +191,6 @@ const RepasFollowupDashboard = () => {
     }
   };
   
-  // Render meal card
   const renderMealCard = (meal) => {
     return (
       <div key={meal.id} className="bg-white rounded-lg p-4 mb-4 shadow border-l-4 border-indigo-500">
@@ -236,7 +226,6 @@ const RepasFollowupDashboard = () => {
     );
   };
   
-  // Calculate day progress
   const calculateDayProgress = () => {
     const todayMeals = getMealsForSelectedDate();
     const totalCalories = todayMeals.reduce((sum, meal) => sum + meal.calories, 0);
@@ -249,7 +238,6 @@ const RepasFollowupDashboard = () => {
     };
   };
   
-  // Render calendar view
   const renderCalendarView = () => {
     const days = generateCalendarDays();
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -327,10 +315,8 @@ const RepasFollowupDashboard = () => {
     );
   };
   
-  // Main component render
   return (
     <div className="bg-gray-100 min-h-screen">
-      {/* Header */}
       <header className="bg-indigo-600 text-white p-4">
         <div className="container mx-auto">
           <div className="flex justify-between items-center">
@@ -343,13 +329,10 @@ const RepasFollowupDashboard = () => {
         </div>
       </header>
       
-      {/* Main Content */}
       <main className="container mx-auto p-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Left Column - Calendar and Navigation */}
           <div className="lg:col-span-1">
-            {/* Navigation Tabs */}
             <div className="bg-white rounded-lg shadow mb-6">
               <div className="grid grid-cols-3">
                 <button 
@@ -376,10 +359,8 @@ const RepasFollowupDashboard = () => {
               </div>
             </div>
             
-            {/* Calendar */}
             {renderCalendarView()}
             
-            {/* Quick Stats */}
             <div className="bg-white rounded-lg shadow mt-6 p-4">
               <h2 className="font-semibold mb-3">Quick Stats</h2>
               
@@ -417,7 +398,6 @@ const RepasFollowupDashboard = () => {
             </div>
           </div>
           
-          {/* Right Column - Meal Details */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow p-4">
               <div className="flex justify-between items-center mb-4">
