@@ -46,7 +46,7 @@ const VerifyEmailContent = () => {
     setIsResending(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URLAPI_GETWAY}/api/auth/verify-email?email=${email}`,{
+      const res = await fetch(`${process.env.NEXT_PUBLIC_URLAPI_GETWAY}/api/auth/verify-email?email=${encodeURIComponent(email)}`,{
         method : 'POST'
       });
       if(res.status == 404){
