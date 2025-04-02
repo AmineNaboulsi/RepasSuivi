@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
     fetchMealData()
   },[])
   const userData: UserData = {
-    name: "Sophie Martin",
+    name: "Aminub",
     dailyCalorieGoal: 2100,
     weightGoal: 68,
     currentWeight: 72.3,

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
+import Cookies from 'js-cookie'
 
 interface FormData {
   email: string;
@@ -79,10 +80,8 @@ const LoginPage = () => {
       });
       const data = await res.json();
       if (res.status === 200) {
-        // if (data.token) {
-        //   cookieStore.set('auth_token', data.token)
-        // }
-        
+        Cookies.set('auth-token', data.token, { expires: 7 });
+
         router.push('/dashboard');
       } else {
         const errorMessage = data.message || 'Invalid email or password. Please try again.';

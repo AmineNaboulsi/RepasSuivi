@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ReCAPTCHA from "react-google-recaptcha";
 import { Eye, EyeOff, Mail, User, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import Cookies from 'js-cookie'
 
 interface FormData {
   name: string;
@@ -110,6 +111,7 @@ const RegisterPage = () => {
       });
       const data = await res.json();
       if(res.status == 201){
+        Cookies.set('auth-token', data.token, { expires: 7 });
         router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
       }else{
         const errorMessage = data.message.email && Array.isArray(data.message.email) 
