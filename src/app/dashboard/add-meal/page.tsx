@@ -5,6 +5,7 @@ import { ArrowLeft, Plus, X, BarChart3, Clock } from 'lucide-react';
 import CalendarView from '../../../components/CalendarView';
 import Cookies from 'js-cookie';
 import { DayType , FoodItem , Meal , MealDataCalender } from '../../../types';
+import Image from 'next/image';
 
 const AddMealPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -147,7 +148,7 @@ const AddMealPage: React.FC = () => {
       const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
       const mealData = {
         meal: {
-          name: mealName || `${mealType.charAt(0).toUpperCase() + mealType.slice(1)} for ${formatDate(currentDate)}`,
+          name: mealName || ``,
           meal_type: mealType,
         },
         meal_items: selectedFoods.map(food => ({
@@ -172,7 +173,7 @@ const AddMealPage: React.FC = () => {
         alert(data.message);
         return;
       }
-      alert("Failed to save meal. Please try again.");
+        alert("Failed to save meal. Please try again.");
     } catch (error) {
       console.error("Error saving meal:", error);
       alert("An error occurred while saving the meal.");
@@ -218,6 +219,7 @@ const AddMealPage: React.FC = () => {
               calculateTotalCalories={calculateTotalCalories}
               navigateMonth={navigateMonth}
               selectDate={selectDate}
+              isLoading={false}
             />
           </div>
           
@@ -301,7 +303,16 @@ const AddMealPage: React.FC = () => {
                             onClick={() => addFoodToMeal(food)}
                           >
                             <div>
-                              <div className="font-medium">{food.name}</div>
+                            <div className="font-medium flex items-center space-x-2">
+                            <Image 
+                                src={food.image_url || "/images/placeholder.png"} 
+                                alt={food.name || "Food image"} 
+                                width={50} 
+                                height={50} 
+                                className="rounded-md mb-1"
+                              />
+                            <span>{food.name}</span>
+                        </div>
                               <div className="text-sm text-gray-500">
                                 {food.calories} cal | {food.proteins}g protein | {food.glucides}g carbs | {food.lipides}g fat
                               </div>
@@ -326,7 +337,17 @@ const AddMealPage: React.FC = () => {
                       {selectedFoods.map((food:FoodItem) => (
                         <div key={food.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
                           <div className="flex-1">
-                            <div className="font-medium">{food.name}</div>
+                          
+                        <div className="font-medium flex items-center space-x-2">
+                            <Image 
+                                src={food.image_url || "/images/placeholder.png"} 
+                                alt={food.name || "Food image"} 
+                                width={50} 
+                                height={50} 
+                                className="rounded-md mb-1"
+                              />
+                            <span>{food.name}</span>
+                        </div>
                             <div className="text-sm text-gray-500">
                               {(food.calories * (food.quantity || 1)).toFixed(1)} cal | {(food.proteins * (food.quantity || 1)).toFixed(1)}g protein
                             </div>

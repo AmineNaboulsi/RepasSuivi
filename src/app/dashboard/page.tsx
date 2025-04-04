@@ -14,46 +14,78 @@ import Cookies from 'js-cookie'
 
 const Dashboard: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isLoadingCalender, setLoadingCalender] = useState<boolean>(true);
   const [mealData, setmealData] = useState<MealDataCalender>({});
   const [currentView, setCurrentView] = useState('overview');
   const [waterIntake, setWaterIntake] = useState(5);
+  const [userData, setuserData] = useState<UserData>({
+      name: "Aminub",
+      dailyCalorieGoal: 2100,
+      weightGoal: 68,
+      currentWeight: 72.3,
+      weightHistory: [],
+  });
   const waterGoal = 8;
-  
-  useEffect(()=>{
-    const fetchMealData = async ()=>{
-      const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
-      const res = await fetch(`${url}/api/meals`,{
-        headers: {
+
+  const fetMeals = async (date:Date)=>{
+
+    const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
+    const FDate = date.toISOString().split("T")[0]; 
+    setLoadingCalender(true)
+    try{
+      const res = await fetch(`${url}/api/meals?date=${FDate}`,{
+        method: "GET" ,
+        headers: { 
           'Content-Type': 'application/json' ,
           'Authorization': `Bearer ${Cookies.get('auth-token')}`
         },
       });
-      const data = await  res.json();
+      const data = await res.json();
       setmealData(data);
+
+    }catch{
+      setLoadingCalender(false)
     }
-    fetchMealData()
-  },[])
-  const userData: UserData = {
-    name: "Aminub",
-    dailyCalorieGoal: 2100,
-    weightGoal: 68,
-    currentWeight: 72.3,
-    weightHistory: [
-      { date: '2025-03-10', weight: 73.1 },
-      { date: '2025-03-11', weight: 73.0 },
-      { date: '2025-03-12', weight: 72.8 },
-      { date: '2025-03-13', weight: 72.6 },
-      { date: '2025-03-14', weight: 72.4 },
-      { date: '2025-03-15', weight: 72.5 },
-      { date: '2025-03-16', weight: 72.3 }
-    ],
-    achievements: [
-      { id: 1, name: "Eat 5 vegetables", completed: true, date: '2025-03-16' },
-      { id: 2, name: "Stay under calorie goal for 7 days", completed: false, progress: 5 },
-      { id: 3, name: "Try 3 new recipes", completed: true, date: '2025-03-12' }
-    ]
   };
-  
+  const fetWeightRecords = async ( date:Date) => {
+    const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
+    const FDate = date.toISOString().split("T")[0]; 
+    try{
+      const ressponse = await fetch(`${url}/api/weight-records?date=${FDate}`,{
+        method: "GET" ,
+        headers: { 
+          'Content-Type': 'application/json' ,
+          'Authorization': `Bearer ${Cookies.get('auth-token')}`
+        },
+      });
+      const weightHistorys = await ressponse.json();
+      setuserData((prev)=>({
+          ...prev ,
+          weightHistory : weightHistorys
+        }
+      ))
+      setLoadingCalender(false)
+      setmealData(data);
+
+
+    }catch{
+      setLoadingCalender(false)
+    }
+
+  };
+  const fetchCalenderData = async (date:Date)=>{
+    setLoadingCalender(true)
+
+    await fetMeals(date)
+    fetWeightRecords(date)
+    
+    setLoadingCalender(false)
+  }
+
+  useEffect(()=>{
+    fetchCalenderData(new Date())
+  },[])
+
   const nutritionData: NutritionData[] = [
     { day: 'Mon', protein: 65, carbs: 120, fat: 45, calories: 1850 },
     { day: 'Tue', protein: 70, carbs: 110, fat: 40, calories: 1780 },
@@ -99,6 +131,7 @@ const Dashboard: React.FC = () => {
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + direction);
     setCurrentDate(newDate);
+    fetchCalenderData(newDate)
   };
   
   const selectDate = (day: DayType) => {
@@ -173,6 +206,7 @@ const Dashboard: React.FC = () => {
                 calculateTotalCalories={calculateTotalCalories}
                 navigateMonth={navigateMonth}
                 selectDate={selectDate}
+                isLoading={isLoadingCalender}
               />
             </div>
             
@@ -180,7 +214,7 @@ const Dashboard: React.FC = () => {
               
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <SummaryCard 
+                <SummaryCard
                   caloriesConsumed={calculateDayProgress().total}
                   caloriesGoal={userData.dailyCalorieGoal}
                   exerciseMinutes={45}

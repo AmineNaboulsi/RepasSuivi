@@ -7,6 +7,7 @@ export interface Meal {
     protein: number;
     carbs: number;
     fat: number;
+    image_url:string,
     items: string[];
   }
   export interface MealDataCalender {
@@ -31,13 +32,6 @@ export interface Meal {
     weightHistory: {
       date: string;
       weight: number;
-    }[];
-    achievements: {
-      id: number;
-      name: string;
-      completed: boolean;
-      date?: string;
-      progress?: number;
     }[];
   }
   
@@ -71,6 +65,7 @@ export interface Meal {
   lipides: number;
   category?: string;
   quantity?: number;
+  image_url?: string;
 }
 
 export interface MealData {

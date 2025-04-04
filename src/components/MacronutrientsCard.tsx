@@ -43,7 +43,7 @@ const MacronutrientsCard: React.FC<MacronutrientsCardProps> = ({ macros }) => {
             <div className="text-sm">
               <p className="font-medium">Current Split</p>
               <p className="text-gray-500">Based on today &apos;s intake</p>
-            </div>
+            </div>  
             <div className="w-16 h-16">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
