@@ -32,7 +32,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     
-    const daysInMonth = lastDay.getDate();
+    const daysInMonth = lastDay.getDate() + 1;
     const startingDayOfWeek = firstDay.getDay();
     
     const days: (DayType | null)[] = [];
@@ -42,22 +42,26 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     }
     
     for (let i = 1; i <= daysInMonth; i++) {
-      const date = new Date(year, month, i);
-      const formattedDate = formatDate(date);
-      const meals = mealData[formattedDate] || [];
-      const totalCalories = calculateTotalCalories(formattedDate);
-      const weightEntry = userData.weightHistory.find(entry => entry.date === formattedDate);
-      
-      days.push({
-        day: i,
-        date: formattedDate,
-        mealCount: meals.length,
-        totalCalories,
-        weight: weightEntry?.weight,
-        isToday: formattedDate === formatDate(new Date())
-      });
+        const date = new Date(year, month, i);
+        const formattedDate = formatDate(date);
+        const dateExists = days.some((item:DayType) => item?.date === formattedDate);
+        
+        if (!dateExists) {
+
+          const meals = mealData[formattedDate] || [];
+          const totalCalories = calculateTotalCalories(formattedDate);
+          const weightEntry = userData.weightHistory.find(entry => entry.date === formattedDate);
+  
+            days.push({
+                day: i ,
+                date: formattedDate,
+                mealCount: meals.length,
+                totalCalories,
+                weight: weightEntry?.weight,
+                isToday: formattedDate === formatDate(new Date())
+            });
+        }
     }
-    
     return days;
   };
 
@@ -110,17 +114,17 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             ${day ? 'cursor-pointer hover:bg-gray-50' : ''}`}
             onClick={() => day && selectDate(day)}
           >
-            {day && (
+            {day ? (
               <>
+              
                 <div className="flex justify-between items-center">
-                  <span className={`text-sm font-medium ${day.isToday ? 'text-indigo-600' : ''}`}>{day.day}</span>
+                  <span className={`text-sm font-medium ${day.isToday ? 'text-indigo-600' : ''}`}>{new Date(day.date).getDate()}</span>
                   {day.mealCount > 0 && (
                     <span className="text-xs bg-green-100 text-green-800 px-1 rounded-full">
                       {day.mealCount}
                     </span>
                   )}
                 </div>
-                
                 {day.totalCalories > 0 && (
                   <div className="mt-1">
                     <div className="h-1 bg-gray-200 rounded-full w-full">
@@ -139,7 +143,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                   </div>
                 )}
               </>
-            )}
+            ):(<></>)}
           </div>
         ))}
       </div>

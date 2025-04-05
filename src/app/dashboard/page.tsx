@@ -11,13 +11,15 @@ import MacronutrientsCard from '../../components/MacronutrientsCard';
 import CaloriesTrendCard from '../../components/CaloriesTrendCard';
 import ActivityCard from '../../components/ActivityCard';
 import Cookies from 'js-cookie'
-
-const Dashboard: React.FC = () => {
+import AddWeight from '../../components/AddWeight'
+import MealPanel from '../../components/MealPanel';
+const Dashboard = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoadingCalender, setLoadingCalender] = useState<boolean>(true);
   const [mealData, setmealData] = useState<MealDataCalender>({});
   const [currentView, setCurrentView] = useState('overview');
   const [waterIntake, setWaterIntake] = useState(5);
+  const [ResetCalenderAction, setResetCalenderAction] = useState<boolean>(false);
   const [userData, setuserData] = useState<UserData>({
       name: "Aminub",
       dailyCalorieGoal: 2100,
@@ -65,8 +67,6 @@ const Dashboard: React.FC = () => {
         }
       ))
       setLoadingCalender(false)
-      setmealData(data);
-
 
     }catch{
       setLoadingCalender(false)
@@ -77,8 +77,8 @@ const Dashboard: React.FC = () => {
     setLoadingCalender(true)
 
     await fetMeals(date)
-    fetWeightRecords(date)
-    
+    await fetWeightRecords(date)
+
     setLoadingCalender(false)
   }
 
@@ -128,20 +128,29 @@ const Dashboard: React.FC = () => {
   };
   
   const navigateMonth = (direction: number) => {
+    UpdateCalenderData(direction);
+  };
+
+  const UpdateCalenderData = (direction:number)=>{
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + direction);
     setCurrentDate(newDate);
     fetchCalenderData(newDate)
-  };
-  
+  }
+
   const selectDate = (day: DayType) => {
     if (day) {
       const newDate = new Date(day.date);
       setCurrentDate(newDate);
+      ChangeDateAction(newDate);
     }
   };
-
-  
+  const ChangeDateAction = (newDate: Date) => {
+    console.log("Date Changed:", newDate);
+  };
+  const UpdatealenderAfterSubmit = () =>{
+    UpdateCalenderData(0)
+  }
   const calculateDayProgress = () => {
     const todayMeals = getMealsForSelectedDate();
     const totalCalories = todayMeals.reduce((sum: number, meal) => sum + meal.calories, 0);
@@ -168,34 +177,8 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </header>
-        
         <div className="container mx-auto mt-6 px-4">
-          <div className="bg-white rounded-lg shadow mb-6">
-            <div className="flex justify-center">
-              <button 
-                className={`py-3 px-6 flex items-center justify-center ${currentView === 'overview' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-                onClick={() => setCurrentView('overview')}
-              >
-                <Calendar size={20} className="mr-2" />
-                <span>Overview</span>
-              </button>
-              <button 
-                className={`py-3 px-6 flex items-center justify-center ${currentView === 'nutrition' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-                onClick={() => setCurrentView('nutrition')}
-              >
-                <BarChart3 size={20} className="mr-2" />
-                <span>Nutrition</span>
-              </button>
-              <button 
-                className={`py-3 px-6 flex items-center justify-center ${currentView === 'achievements' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-                onClick={() => setCurrentView('achievements')}
-              >
-                <Award size={20} className="mr-2" />
-                <span>Achievements</span>
-              </button>
-            </div>
-          </div>
-          
+       
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
             <div className="lg:col-span-1 space-y-6 relative">
               <CalendarView 
@@ -211,51 +194,65 @@ const Dashboard: React.FC = () => {
             </div>
             
             <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-lg shadow mb-6">
+            <div className="flex justify-center">
+              <button 
+                className={`py-3 px-6 flex items-center justify-center ${currentView === 'overview' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
+                onClick={() => setCurrentView('overview')}
+              >
+                <Calendar size={20} className="mr-2" />
+                <span>Overview</span>
+              </button>
+              <button 
+                className={`py-3 px-6 flex items-center justify-center ${currentView === 'meals' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
+                onClick={() => setCurrentView('meals')}
+              >
+                <BarChart3 size={20} className="mr-2" />
+                <span>Meals</span>
+              </button>
+              <button 
+                className={`py-3 px-6 flex items-center justify-center ${currentView === 'weightTracking' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
+                onClick={() => setCurrentView('weightTracking')}
+              >
+                <Award size={20} className="mr-2" />
+                <span>Log Weight</span>
+              </button>
+            </div>
+          </div>
+              {
+                currentView === 'overview' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <SummaryCard
+                      caloriesConsumed={calculateDayProgress().total}
+                      caloriesGoal={userData.dailyCalorieGoal}
+                      exerciseMinutes={45}
+                      exerciseGoal={60}
+                      waterIntake={waterIntake}
+                      waterGoal={waterGoal}
+                      setWaterIntake={setWaterIntake}
+                    />
+                    
+                    <MacronutrientsCard macros={currentMacros} />
+                    
+                    <CaloriesTrendCard data={nutritionData} />
+                    
+                    <ActivityCard data={activityData} />
+                  </div>
+                ) : 
+                currentView === 'meals' ? (
+                  <MealPanel
+                  currentDate={currentDate}
+                  getMealsForSelectedDate={getMealsForSelectedDate} 
+                  UpdatealenderAfterSubmit={UpdatealenderAfterSubmit}
+                  />
               
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <SummaryCard
-                  caloriesConsumed={calculateDayProgress().total}
-                  caloriesGoal={userData.dailyCalorieGoal}
-                  exerciseMinutes={45}
-                  exerciseGoal={60}
-                  waterIntake={waterIntake}
-                  waterGoal={waterGoal}
-                  setWaterIntake={setWaterIntake}
-                />
-                
-                <MacronutrientsCard macros={currentMacros} />
-                
-                <CaloriesTrendCard data={nutritionData} />
-                
-                <ActivityCard data={activityData} />
-              </div>
-              <div className="bg-white rounded-xl shadow-sm p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-semibold">
-                    Meals for {currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                  </h2>
-                  <Link href='/dashboard/add-meal' className="bg-indigo-600 text-white px-3 py-2 rounded-lg flex items-center text-sm">
-                    <Plus size={16} className="mr-1" />
-                    Add Meal
-                  </Link>
-                </div>
-                
-              
-                
-                <div className="mt-4">
-                  {getMealsForSelectedDate().length > 0 ? (
-                    getMealsForSelectedDate().map(meal => (
-                      <MealCard key={meal.id} meal={meal} />
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-gray-500">
-                      Select a date with meals to view details
-                    </div>
-                  )}
-                </div>
-              </div>
-            
+                ) : (
+                  <AddWeight 
+                    datePicked={currentDate}
+                    changeDate={ChangeDateAction}
+                    />
+                )
+              }
             </div>
           </div>
         </div>
