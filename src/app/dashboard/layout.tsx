@@ -15,9 +15,7 @@ export default function DashboardLayout({
   return (
     <AuthGuard>
       <QueryClientProvider client={queryClient}>
-
         <div className="min-h-screen bg-gray-100">
-          {/* Add Sidebar / Header if needed */}
           {children}
         </div>
       </QueryClientProvider>

@@ -81,9 +81,9 @@ const RegisterPage = () => {
       newErrors.terms = 'You must agree to the Terms and Conditions';
     }
     
-    if (!captchaToken) {
-      newErrors.captcha = 'Please complete the reCAPTCHA';
-    }
+    // if (!captchaToken) {
+    //   newErrors.captcha = 'Please complete the reCAPTCHA';
+    // }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -296,11 +296,11 @@ const RegisterPage = () => {
             </div>
             
             <div className="flex justify-center">
-              <ReCAPTCHA
+              {/* <ReCAPTCHA
                 sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
                 onChange={handleCaptchaChange}
                 ref={recaptchaRef}
-              />
+                /> */}
             </div>
             {errors.captcha && <p className="mt-1 text-sm text-center text-red-600">{errors.captcha}</p>}
             
