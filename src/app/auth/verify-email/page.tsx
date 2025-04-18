@@ -27,6 +27,7 @@ const VerifyEmailContent = () => {
 
     const handleVerify = async (token:string) => {
       setIsVerifying(true);
+      console.log(token)
       try {
         setVerificationStatus((prev)=>({
           ...prev,

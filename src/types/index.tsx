@@ -27,7 +27,6 @@ export interface Meal {
   export interface UserData {
     name: string;
     dailyCalorieGoal: number;
-    weightGoal: number;
     currentWeight: number;
     weightHistory: {
       date: string;
@@ -65,6 +64,7 @@ export interface Meal {
   lipides: number;
   category?: string;
   quantity?: number;
+  unite?: string;
   image_url?: string;
 }
 

@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState , useEffect} from 'react';
-import { Scale, TrendingUp, TrendingDown, Minus, Calendar, Info, ArrowLeft } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
-import { DayType } from '../types';
 import { motion } from 'framer-motion';
 
 interface typeAddWeightProps {
@@ -44,7 +43,7 @@ const AddWeight = ({datePicked , changeDate  }: typeAddWeightProps) => {
   
   useEffect(() => {
     fetchPreviousWeight(datePicked);
-  }, [changeDate]);
+  }, [changeDate ,datePicked]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +66,7 @@ const AddWeight = ({datePicked , changeDate  }: typeAddWeightProps) => {
         note : notes
       };
       
-      const res = await fetch(`${url}/api/weight-records/addweight`, {
+      const res = await fetch(`${url}/api/weight-records`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

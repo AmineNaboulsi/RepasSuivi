@@ -24,7 +24,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
   setWaterIntake
 }) => {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm">
+    <div className="bg-white p-6 rounded-xl shadow-sm ">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800">Today&apos;s Summary</h2>
         <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">On Track</span>
@@ -42,8 +42,8 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
             </div>
           </div>
           <div className="w-16 h-16">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+            <ResponsiveContainer  width="100%" height="100%">
+              <PieChart className='-z-0'>
                 <Pie
                   data={[
                     { name: 'Consumed', value: caloriesConsumed },

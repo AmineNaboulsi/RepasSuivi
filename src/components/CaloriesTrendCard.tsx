@@ -18,7 +18,7 @@ const CaloriesTrendCard: React.FC<CaloriesTrendCardProps> = ({ data }) => {
       
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
+          <LineChart  data={data}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="day" tickLine={false} axisLine={false} />
             <YAxis axisLine={false} tickLine={false} width={30} />

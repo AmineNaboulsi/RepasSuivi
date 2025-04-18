@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { User, Calendar, BarChart3, Award, Plus } from 'lucide-react';
-import Link from 'next/link';
+import { Calendar, BarChart3, Award, Menu, ChevronRight, AlertCircle, CalendarIcon, X } from 'lucide-react';
+
 import { DayType, UserData, NutritionData, ActivityData, MacroData ,MealDataCalender } from '../../types';
 import CalendarView from '../../components/CalendarView';
-import MealCard from '../../components/MealCard';
 import SummaryCard from '../../components/SummaryCard';
 import MacronutrientsCard from '../../components/MacronutrientsCard';
 import CaloriesTrendCard from '../../components/CaloriesTrendCard';
@@ -13,17 +12,21 @@ import ActivityCard from '../../components/ActivityCard';
 import Cookies from 'js-cookie'
 import AddWeight from '../../components/AddWeight'
 import MealPanel from '../../components/MealPanel';
+import { motion, AnimatePresence } from 'framer-motion';
+import NutritionPanelGoals from '@/components/NutritionPanelGoals';
+
 const Dashboard = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoadingCalender, setLoadingCalender] = useState<boolean>(true);
   const [mealData, setmealData] = useState<MealDataCalender>({});
   const [currentView, setCurrentView] = useState('overview');
   const [waterIntake, setWaterIntake] = useState(5);
-  const [ResetCalenderAction, setResetCalenderAction] = useState<boolean>(false);
+  const [nutritionData , setnutritionData] = useState<NutritionData[]>([]);
+
+  // const [ResetCalenderAction, setResetCalenderAction] = useState<boolean>(false);
   const [userData, setuserData] = useState<UserData>({
       name: "Aminub",
       dailyCalorieGoal: 2100,
-      weightGoal: 68,
       currentWeight: 72.3,
       weightHistory: [],
   });
@@ -49,6 +52,28 @@ const Dashboard = () => {
       setLoadingCalender(false)
     }
   };
+
+  const fetMealsTrends = async (date:Date)=>{
+
+    const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
+    const FDate = date.toISOString().split("T")[0]; 
+    setLoadingCalender(true)
+    try{
+      const res = await fetch(`${url}/api/getcaloroystrend?date=${FDate}`,{
+        method: "GET" ,
+        headers: { 
+          'Content-Type': 'application/json' ,
+          'Authorization': `Bearer ${Cookies.get('auth-token')}`
+        },
+      });
+      const data = await res.json();
+      setnutritionData(data);
+
+    }catch{
+      setLoadingCalender(false)
+    }
+  };
+
   const fetWeightRecords = async ( date:Date) => {
     const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
     const FDate = date.toISOString().split("T")[0]; 
@@ -73,28 +98,21 @@ const Dashboard = () => {
     }
 
   };
-  const fetchCalenderData = async (date:Date)=>{
+
+  const fetchCalenderData = React.useCallback(async (date:Date)=>{
     setLoadingCalender(true)
 
     await fetMeals(date)
     await fetWeightRecords(date)
+    await fetMealsTrends(date)
 
     setLoadingCalender(false)
-  }
+  }, [/*fetMeals, fetWeightRecords*/])
 
   useEffect(()=>{
     fetchCalenderData(new Date())
-  },[])
+  },[fetchCalenderData])
 
-  const nutritionData: NutritionData[] = [
-    { day: 'Mon', protein: 65, carbs: 120, fat: 45, calories: 1850 },
-    { day: 'Tue', protein: 70, carbs: 110, fat: 40, calories: 1780 },
-    { day: 'Wed', protein: 60, carbs: 130, fat: 38, calories: 1720 },
-    { day: 'Thu', protein: 72, carbs: 105, fat: 42, calories: 1805 },
-    { day: 'Fri', protein: 68, carbs: 112, fat: 44, calories: 1900 },
-    { day: 'Sat', protein: 55, carbs: 140, fat: 50, calories: 2100 },
-    { day: 'Sun', protein: 62, carbs: 125, fat: 48, calories: 1950 },
-  ];
 
   const activityData: ActivityData[] = [
     { day: 'Mon', minutes: 45, calories: 320 },
@@ -163,20 +181,8 @@ const Dashboard = () => {
   };
 
   return (
-      <div className="bg-gray-100 min-h-screen">
-        <header className="bg-indigo-600 text-white p-4 shadow-md">
-          <div className="container mx-auto">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold">RepasSuivi</h1>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 ml-4">
-                  <span>{userData.name}</span>
-                  <User size={20} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
+    <div className="bg-gray-100 min-h-screen ">
+        <NutritionPanelGoals />
         <div className="container mx-auto mt-6 px-4">
        
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
@@ -201,6 +207,7 @@ const Dashboard = () => {
                 onClick={() => setCurrentView('overview')}
               >
                 <Calendar size={20} className="mr-2" />
+                
                 <span>Overview</span>
               </button>
               <button 
@@ -223,6 +230,7 @@ const Dashboard = () => {
                 currentView === 'overview' ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <SummaryCard
+                    
                       caloriesConsumed={calculateDayProgress().total}
                       caloriesGoal={userData.dailyCalorieGoal}
                       exerciseMinutes={45}

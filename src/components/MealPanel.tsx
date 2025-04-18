@@ -2,7 +2,7 @@
 
 import { Plus, ArrowLeft } from 'lucide-react';
 import React, { useState } from 'react';
-import { DayType, Meal } from '@/types';
+import {  Meal } from '@/types';
 import MealCard from './MealCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import PanelAddMeal from '../components/PanelAddMeal'
@@ -21,7 +21,10 @@ const MealPanel = ({ currentDate, getMealsForSelectedDate ,UpdatealenderAfterSub
     month: 'long',
     day: 'numeric',
   });
-
+  const handleDeleteMeal = (mealId:number) => {
+    console.log('Deleting meal with ID:', mealId);
+    UpdatealenderAfterSubmit();
+  };
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 relative overflow-hidden">
       <div className="flex justify-between items-center mb-4">
@@ -49,7 +52,7 @@ const MealPanel = ({ currentDate, getMealsForSelectedDate ,UpdatealenderAfterSub
             >
               {getMealsForSelectedDate().length > 0 ? (
                 getMealsForSelectedDate().map(meal => (
-                  <MealCard key={meal.id} meal={meal} />
+                  <MealCard key={meal.id} meal={meal} onDelete={handleDeleteMeal} />
                 ))
               ) : (
                 <div className="text-center py-4 text-gray-500">

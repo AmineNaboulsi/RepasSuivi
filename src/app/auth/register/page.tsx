@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import ReCAPTCHA from "react-google-recaptcha";
+// import ReCAPTCHA from "react-google-recaptcha";
 import { Eye, EyeOff, Mail, User, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import Cookies from 'js-cookie'
 
@@ -35,15 +35,15 @@ const RegisterPage = () => {
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // const recaptchaRef = useRef<ReCAPTCHA>(null);
   
-  const handleCaptchaChange = (token: string | null) => {
-    setCaptchaToken(token);
-    if (errors.captcha) {
-      setErrors(prev => ({ ...prev, captcha: undefined }));
-    }
-  };
+  // const handleCaptchaChange = (token: string | null) => {
+  //   // setCaptchaToken(token);
+  //   if (errors.captcha) {
+  //     setErrors(prev => ({ ...prev, captcha: undefined }));
+  //   }
+  // };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;

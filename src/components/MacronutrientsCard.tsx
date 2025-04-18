@@ -11,7 +11,7 @@ interface MacronutrientsCardProps {
 
 const MacronutrientsCard: React.FC<MacronutrientsCardProps> = ({ macros }) => {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm">
+    <div className="bg-white p-6 rounded-xl shadow-sm ">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800">Macronutrients</h2>
         <div className="p-1.5 bg-indigo-100 rounded-lg">

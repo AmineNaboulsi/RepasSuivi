@@ -25,7 +25,6 @@ export default function Home() {
         <title>RepasSuivi - Bientôt disponible</title>
         <meta name="description" content="RepasSuivi - Votre solution de suivi nutritionnel personnalisé" />
       </Head>
-      
       <main className="container mx-auto px-4 py-12 relative z-10">
         <div className={`absolute top-1/4 left-0 w-64 h-64 bg-purple-500 rounded-full filter blur-3xl opacity-5 ${isAnimated ? 'animate-blob' : ''}`}></div>
         <div className={`absolute bottom-1/4 right-0 w-80 h-80 bg-blue-500 rounded-full filter blur-3xl opacity-5 ${isAnimated ? 'animate-blob animation-delay-2000' : ''}`}></div>

@@ -3,10 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
 import Cookies from 'js-cookie';
-import { FoodItem, MealDataCalender } from '../types';
+import { FoodItem } from '../types';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion'; 
 
 interface TypePanelMeal {
   currentDate: Date;
@@ -32,6 +33,8 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
   const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
   const [mealName, setMealName] = useState('');
   const [isLoadingDataSubmit, setIsLoadingDataSubmit] = useState(false);
+  const [swipingId, setSwipingId] = useState<null | number>(null);
+
 
   const { data: searchResults = [], isLoading, refetch } = useQuery({
     queryKey: ['searchFoods', searchTerm],
@@ -49,7 +52,7 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
   }, [searchTerm, refetch]);
 
   const addFoodToMeal = (food: FoodItem) => {
-    let exists = selectedFoods.some(item => item.id === food.id) 
+    const exists = selectedFoods.some(item => item.id === food.id) 
     !exists && setSelectedFoods([...selectedFoods, { ...food, quantity: 1 }]);
     setSearchTerm('');
   };
@@ -63,19 +66,19 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
       food.id === foodId ? { ...food, quantity: Math.max(1, quantity) } : food
     ));
   };
-
-  const calculateMealTotals = () => {
-    return selectedFoods.reduce((totals, food) => {
-      const quantity = food.quantity || 1;
-      return {
-        calories: totals.calories + (food.calories * quantity),
-        proteins: totals.proteins + (food.proteins * quantity),
-        carbs: totals.carbs + (food.glucides * quantity),
-        fats: totals.fats + (food.lipides * quantity)
-      };
-    }, { calories: 0, proteins: 0, carbs: 0, fats: 0 });
+  const handleDragEnd = (foodId: number, info:any) => {
+    if (info.offset.x < -100) { 
+      removeFoodFromMeal(foodId);
+    }
+    setSwipingId(null);
   };
-
+  const updateFoodUnite = (foodId:number, unite:string) => {
+    setSelectedFoods(prev => 
+      prev.map(food => 
+        food.id === foodId ? { ...food, unite } : food
+      )
+    );
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedFoods.length === 0) {
@@ -86,7 +89,7 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
     try {
       setIsLoadingDataSubmit(true);
       const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
-      const res = await fetch(`${url}/api/meals/addmeal`, {
+      const res = await fetch(`${url}/api/meals`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +103,8 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
           },
           meal_items: selectedFoods.map(food => ({
             id: food.id,
-            quantity: food.quantity
+            quantity: food.quantity,
+            unite: food.unite || 'piece'
           }))
         })
       });
@@ -137,7 +141,6 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
           {currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
         </h3>
       </div>
-
       <div>
         <label className="block mb-1 font-medium">Meal Name (optional)</label>
         <input
@@ -204,54 +207,88 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
       {selectedFoods.length > 0 && (
         <div>
           <h4 className="font-semibold mb-2">Selected Foods</h4>
-
-          {selectedFoods.map((food:FoodItem) => (
-                        <div key={food.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                          <div className="flex-1">
-                          
-                        <div className="font-medium flex items-center space-x-2">
-                            <Image 
-                                src={food.image_url || "/images/placeholder.png"} 
-                                alt={food.name || "Food image"} 
-                                width={50} 
-                                height={50} 
-                                className="rounded-md mb-1"
-                              />
-                            <span>{food.name}</span>
-                        </div>
-                            <div className="text-sm text-gray-500">
-                              {(food.calories * (food.quantity || 1)).toFixed(1)} cal | {(food.proteins * (food.quantity || 1)).toFixed(1)}g protein
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <div className="flex items-center border rounded-md">
-                              <button
-                                type="button"
-                                className="px-2 py-1 text-gray-700 hover:bg-gray-200"
-                                onClick={() => updateFoodQuantity(food.id, (food.quantity || 1) - 1)}
-                              >
-                                -
-                              </button>
-                              <span className="px-3">{food.quantity}</span>
-                              <button
-                                type="button"
-                                className="px-2 py-1 text-gray-700 hover:bg-gray-200"
-                                onClick={() => updateFoodQuantity(food.id, (food.quantity || 1) + 1)}
-                              >
-                                +
-                              </button>
-                            </div>
-                            <button
-                              type="button"
-                              className="text-red-500 hover:text-red-700"
-                              onClick={() => removeFoodFromMeal(food.id)}
-                            >
-                            </button>
-                            <button type="button" onClick={() => removeFoodFromMeal(food.id)} className="text-red-500">Remove</button>
-                          </div>
-                        </div>
-                      ))}
-
+          {selectedFoods.map((food) => (
+        <motion.div 
+          key={food.id} 
+          className="relative overflow-hidden rounded-lg bg-white"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragStart={() => setSwipingId(food.id)}
+          onDragEnd={(_, info) => handleDragEnd(food.id, info)}
+          style={{ 
+            x: swipingId === food.id ? undefined : 0 
+          }}
+        >
+          <div className="absolute inset-0 flex items-center justify-end bg-red-500 px-4">
+            <Trash2 className="text-white" />
+          </div>
+          
+          <motion.div 
+            className="relative bg-white flex items-center justify-between py-3 px-4 border-b last:border-b-0"
+          >
+            <div className="flex-1">
+              <div className="font-medium flex items-center space-x-2">
+                <Image 
+                  src={food.image_url || "/images/placeholder.png"} 
+                  alt={food.name || "Food image"} 
+                  width={50} 
+                  height={50} 
+                  className="rounded-md mb-1"
+                />
+                <span>{food.name}</span>
+              </div>
+              <div className="text-sm text-gray-500">
+                {(food.calories * (food.quantity || 1)).toFixed(1)} cal | {(food.proteins * (food.quantity || 1)).toFixed(1)}g protein
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center">
+                <div className="flex items-center border rounded-md mr-2">
+                  <button
+                    type="button"
+                    className="px-2 py-1 text-gray-700 hover:bg-gray-200"
+                    onClick={() => updateFoodQuantity(food.id, (food.quantity || 1) - 1)}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    className="w-14 px-2 py-1 text-center border-x"
+                    value={food.quantity || 1}
+                    onChange={(e) => updateFoodQuantity(food.id, parseFloat(e.target.value) || 0)}
+                  />
+                  <button
+                    type="button"
+                    className="px-2 py-1 text-gray-700 hover:bg-gray-200"
+                    onClick={() => updateFoodQuantity(food.id, (food.quantity || 1) + 1)}
+                  >
+                    +
+                  </button>
+                </div>
+                <select
+                  className="border rounded-md px-2 py-1"
+                  value={food.unite || "piece"}
+                  onChange={(e) => updateFoodUnite(food.id, e.target.value)}
+                >
+                  <option value="g">g</option>
+                  <option value="kg">kg</option>
+                  <option value="ml">ml</option>
+                  <option value="l">l</option>
+                  <option value="piece">piece</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                className="text-red-500 hover:text-red-700 md:block hidden"
+                onClick={() => removeFoodFromMeal(food.id)}
+              >
+                <Trash2 className="text-red-500" />
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      ))}
         </div>
       )}
 

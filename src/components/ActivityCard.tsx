@@ -17,8 +17,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ data }) => {
       </div>
       
       <div className="h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
+        <ResponsiveContainer width="100%" height="100%" > 
+          <BarChart data={data} >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="day" tickLine={false} axisLine={false} />
             <YAxis axisLine={false} tickLine={false} width={30} />

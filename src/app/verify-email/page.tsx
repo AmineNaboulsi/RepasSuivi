@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 
 function VerifyEmail() {
     const [verificationStatus, setVerificationStatus] = useState<{
-        status?: string;
+        status?: number;
         message?: string;
     }>({});
     const [loading, setLoading] = useState(true);
@@ -19,26 +19,29 @@ function VerifyEmail() {
                 
                 if (!token) {
                     setVerificationStatus({ 
-                        status: 'error', 
+                        status: 400, 
                         message: 'No verification token found' 
                     });
                     setLoading(false);
                     return;
                 }
-                
-                const response = await fetch(`${process.env.NEXT_PUBLIC_URLAPI_GETWAY}/verify-email`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_URLAPI_GETWAY}/verifyemail?_token=${token}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ token }),
                 });
-                
+                console.log(response)
                 const data = await response.json();
+                setVerificationStatus({ 
+                    status: response.status, 
+                    message: data.message
+                });
                 setVerificationStatus(data);
             } catch (error) {
+                console.error(error)
                 setVerificationStatus({ 
-                    status: 'error', 
+                    status: 400, 
                     message: 'Failed to verify email' 
                 });
             } finally {
@@ -56,11 +59,13 @@ function VerifyEmail() {
                     <p>Verifying your email...</p>
                 ) : (
                     <>
+{/*                     
                         <h1 className="text-2xl font-bold mb-4">
-                            {verificationStatus.status === 'success' 
+                            
+                            {verificationStatus.status == 200
                                 ? 'Email Verified!' 
                                 : 'Verification Failed'}
-                        </h1>
+                        </h1> */}
                         <p>{verificationStatus.message}</p>
                     </>
                 )}
