@@ -1,20 +1,22 @@
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { AlertCircle, CalendarIcon, X } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import {motion } from 'framer-motion'
 import Cookies from 'js-cookie';
+import { TypeSubmitionDataGoals ,TypeNutritionGoal} from "@/types/index";
 
-export default function NutritionPanelGoals() {
+export default function NutritionPanelGoals({ setSubmitGolas }:TypeSubmitionDataGoals) {
   const [isFormOpen, setIsFormOpen] = useState(true);
   const [isloading, loading] = useState(false);
-  const [nutritionGoal, setNutritionGoal] = useState({});
+  const [nutritionGoal, setNutritionGoal] = useState<TypeNutritionGoal>();
   const [nutritionGoalStatus, setnutritionGoalStatus] = useState({
     status: true,
-    message: "vdsvdsvdsvsd",
+    message: "",
   });
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
+    setSubmitGolas(true);
   };
   
   const handleFormSubmit = async (data) => {
@@ -46,10 +48,12 @@ export default function NutritionPanelGoals() {
         status: true,
         message: "",
       });
-    }catch(err){
+      setSubmitGolas(true);
+
+    }catch(err:any){
       setnutritionGoalStatus({
         status: false,
-        message: "Error submitting nutrition goals:", err,
+        message: "Error submitting nutrition goals:" + err,
       });
       loading(false);
     }
@@ -92,12 +96,12 @@ export default function NutritionPanelGoals() {
                   e.preventDefault();
                   
                   const formData = {
-                    dailyCalorieTarget: Number(e.target.dailyCalorieTarget.value),
-                    proteinTarget: Number(e.target.proteinTarget.value),
-                    carbTarget: Number(e.target.carbTarget.value),
-                    fatTarget: Number(e.target.fatTarget.value),
-                    startDate: e.target.startDate.value,
-                    endDate: e.target.endDate.value,
+                    dailyCalorieTarget: Number(e.target?.dailyCalorieTarget.value || ""),
+                    proteinTarget: Number(e.target?.proteinTarget.value || ""),
+                    carbTarget: Number(e.target?.carbTarget.value || ""),
+                    fatTarget: Number(e.target?.fatTarget.value || ""),
+                    startDate: e.target?.startDate.value || new Date().toISOString().split('T')[0],
+                    endDate: e.target?.endDate.value || new Date().toISOString().split('T')[0],
                   };
                   
                   handleFormSubmit(formData);

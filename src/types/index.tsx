@@ -27,7 +27,6 @@ export interface Meal {
   export interface UserData {
     name: string;
     dailyCalorieGoal: number;
-    currentWeight: number;
     weightHistory: {
       date: string;
       weight: number;
@@ -81,3 +80,15 @@ export interface ApiResponse {
   message?: string;
 }
   
+export interface TypeSubmitionDataGoals {
+  setSubmitGolas : (value:boolean) => void
+}
+
+export interface  TypeNutritionGoal {
+  dailyCalorieTarget: number;
+  proteinTarget: number;
+  carbTarget: number;
+  fatTarget: number;
+  startDate: string;
+  endDate: string;
+};

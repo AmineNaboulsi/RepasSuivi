@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
 import Cookies from 'js-cookie'
+import { verifyNutritionGoals } from '@/lib/nutritionGolas';
 
 interface FormData {
   email: string;
@@ -81,8 +82,14 @@ const LoginPage = () => {
       const data = await res.json();
       if (res.status === 200) {
         Cookies.set('auth-token', data.token, { expires: 7 });
-
-        router.push('/dashboard');
+      
+        const nextRoute = await verifyNutritionGoals(data.token);
+      
+        if (nextRoute === 'nutrition-goals') {
+          router.push('/nutrition-goals'); // Show the form / popup there
+        } else {
+          router.push('/dashboard');
+        }
       } else {
         const errorMessage = data.message || 'Invalid email or password. Please try again.';
         setMessage(errorMessage);
