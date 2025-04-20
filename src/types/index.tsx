@@ -14,7 +14,14 @@ export interface Meal {
     [date: string]: Meal[];
   }
 
-
+  export interface ExericiseDataType {
+    [date: string]: ExerciseData[];  // #################################################################
+  }
+  export interface ExerciseData {
+    exerciseType: string;
+    minutes: string;
+    calories: string;
+  }
   export interface DayType {
     day: number;
     date: string;
@@ -49,7 +56,6 @@ export interface Meal {
   
   export interface MacroData {
     name: string;
-    value: number;
     color: string;
     goal: number;
   }

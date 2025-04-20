@@ -84,9 +84,8 @@ const LoginPage = () => {
         Cookies.set('auth-token', data.token, { expires: 7 });
       
         const nextRoute = await verifyNutritionGoals(data.token);
-      
         if (nextRoute === 'nutrition-goals') {
-          router.push('/nutrition-goals'); // Show the form / popup there
+          router.push('/nutrition-goals');
         } else {
           router.push('/dashboard');
         }
