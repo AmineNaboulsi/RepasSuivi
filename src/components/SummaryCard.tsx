@@ -1,9 +1,10 @@
 "use client";
 
 import React from 'react';
-import { Utensils, Activity, Droplet } from 'lucide-react';
+import { Utensils, Activity, Droplet, TriangleAlert } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { BlurFade } from './magicui/blur-fade';
+import { ExericiseDataType } from '@/types';
 
 interface SummaryCardProps {
   caloriesConsumed: number;
@@ -12,6 +13,7 @@ interface SummaryCardProps {
   exerciseGoal: number;
   waterIntake: number;
   waterGoal: number;
+  ExercisesAvalibale:ExericiseDataType[];
   setWaterIntake: (value: number) => void;
 }
 
@@ -22,6 +24,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
   exerciseGoal,
   waterIntake,
   waterGoal,
+  ExercisesAvalibale,
   setWaterIntake
 }) => {
   return (
@@ -35,11 +38,15 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <div className="p-2 bg-indigo-100 rounded-lg mr-3">
-                <Utensils size={20} className="text-indigo-600" />
+                <Utensils size={20} className={`${caloriesConsumed ==null ? 'text-red-600':'text-indigo-600' }`} />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Calories</p>
-                <p className="font-semibold">{caloriesConsumed} / {caloriesGoal}</p>
+                <p className={`text-sm ${caloriesConsumed ==null?'text-red-600' : 'text-gray-600'}`}>Calories</p>
+                {caloriesConsumed !=null ?
+                  <p className="font-semibold">{caloriesConsumed ?? 0} / {caloriesGoal}</p>
+                  :
+                  <p className="font-semibold text-red-800">-- mins / -- mins</p>
+                }
               </div>
             </div>
             <div className="w-16 h-16">
@@ -70,15 +77,27 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                <Activity size={20} className="text-blue-600" />
+                <Activity size={20} className={`${ExercisesAvalibale==null ? 'text-red-600':'text-blue-600' }`} />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Exercise</p>
-                <p className="font-semibold">{exerciseMinutes} mins / {exerciseGoal} mins</p>
+                <p className={`text-sm ${ExercisesAvalibale ==null ? 'text-red-600':'text-gray-600' }`}>Exercise</p>
+                {ExercisesAvalibale !=null ?
+                  <p className="font-semibold">{exerciseMinutes} mins / {exerciseGoal} mins</p>
+                  :
+                  <p className="font-semibold text-red-800">-- mins / -- mins</p>
+                }
               </div>
             </div>
-            <div className="w-16 h-2 bg-gray-200 rounded-full">
-              <div className="h-2 bg-blue-600 rounded-full" style={{ width: `${Math.min(100, (exerciseMinutes / exerciseGoal) * 100)}%` }}></div>
+            <div className="relative w-16 h-2 bg-gray-200 rounded-full">
+              {ExercisesAvalibale==null ? 
+              (
+                <>
+                  <TriangleAlert size={20} className="absolute right-0 -top-1 text-red-800" />
+                  <div className="h-2 bg-red-200 rounded-full transition-all duration-1500" ></div>
+                </>
+              ):
+              <div className="h-2 bg-blue-600 rounded-full transition-all duration-1500" style={{ width: `${Math.min(100, (exerciseMinutes / exerciseGoal) * 100)}%` }}></div>
+              }
             </div>
           </div>
           

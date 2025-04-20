@@ -41,78 +41,11 @@ const Dashboard = () => {
   });
   const waterGoal = 8;
 
-  const fetMeals = async (date:Date)=>{
-
-    const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
-    const FDate = date.toISOString().split("T")[0]; 
-    setLoadingCalender(true)
-    try{
-      const res = await fetch(`${url}/api/meals?date=${FDate}`,{
-        method: "GET" ,
-        headers: { 
-          'Content-Type': 'application/json' ,
-          'Authorization': `Bearer ${Cookies.get('auth-token')}`
-        },
-      });
-      const data = await res.json();
-      setmealData(data);
-
-    }catch{
-      setLoadingCalender(false)
-    }
-  };
-
-  const fetMealsTrends = async (date:Date)=>{
-
-    const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
-    const FDate = date.toISOString().split("T")[0]; 
-    setLoadingCalender(true)
-    try{
-      const res = await fetch(`${url}/api/getcaloroystrend?date=${FDate}`,{
-        method: "GET" ,
-        headers: { 
-          'Content-Type': 'application/json' ,
-          'Authorization': `Bearer ${Cookies.get('auth-token')}`
-        },
-      });
-      const data = await res.json();
-      setnutritionData(data);
-
-    }catch{
-      setLoadingCalender(false)
-    }
-  };
-
-  const fetWeightRecords = async ( date:Date) => {
+  const fetchstatistics = async(date) => {
     const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
     const FDate = date.toISOString().split("T")[0]; 
     try{
-      const ressponse = await fetch(`${url}/api/weight-records?date=${FDate}`,{
-        method: "GET" ,
-        headers: { 
-          'Content-Type': 'application/json' ,
-          'Authorization': `Bearer ${Cookies.get('auth-token')}`
-        },
-      });
-      const weightHistorys = await ressponse.json();
-      setuserData((prev)=>({
-          ...prev ,
-          weightHistory : weightHistorys
-        }
-      ))
-      setLoadingCalender(false)
-
-    }catch{
-      setLoadingCalender(false)
-    }
-
-  };
-
-  const fetExercisesTrends = async(date , forweek:boolean) => {
-    const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
-    const FDate = date.toISOString().split("T")[0]; 
-    try{
-      const ressponse = await fetch(`${url}/api/exercises?${forweek ? 'f=week&':''}date=${FDate}`,{
+      const ressponse = await fetch(`${url}/api/statistics?date=${FDate}`,{
         method: "GET" ,
         headers: { 
           'Content-Type': 'application/json' ,
@@ -120,21 +53,37 @@ const Dashboard = () => {
         },
       });
       const Exercises = await ressponse.json();
-      forweek ? setactivityData(Exercises) : setactivityDataMounth(Exercises);
+      Exercises.forEach((Servicedata : {name : string , data : any})=>{
+          Servicedata.name == "exercises" ? 
+          setactivityDataMounth(Servicedata.data) : 
+          Servicedata.name == "exercises-week" ? 
+          setactivityData(Servicedata.data) : 
+          Servicedata.name == "caloroystrend" ? 
+          setnutritionData(Servicedata.data) : 
+          Servicedata.name == "nutritiongoeals" ? 
+          setcurrentMacros(()=>{
+            return [
+              { name: 'Protein' , color: '#8884d8', goal: Servicedata.data?.proteinTarget },
+              { name: 'Carbs', color: '#82ca9d', goal: Servicedata.data?.carbTarget },
+              { name: 'Fat', color: '#ffc658', goal: Servicedata.data?.fatTarget },
+            ]
+          }) : 
+          Servicedata.name == "weight-records" ? 
+            setuserData((prev)=>({
+              ...prev ,
+              weightHistory : Servicedata.data
+            }
+            )): 
+          Servicedata.name == "meals" &&
+          setmealData(Servicedata.data);
+      })
     }catch{
       //
     }
   }
-
   const fetchCalenderData = React.useCallback(async (date:Date)=>{
     setLoadingCalender(true)
-
-    await fetMeals(date)
-    await fetWeightRecords(date)
-    await fetMealsTrends(date)
-    await fetExercisesTrends(date , true)
-    await fetExercisesTrends(date , false)
-
+    await fetchstatistics(date)
     setLoadingCalender(false)
   }, [/*fetMeals, fetWeightRecords*/])
 
@@ -148,46 +97,18 @@ const Dashboard = () => {
   
   const getMealsForSelectedDate = () => {
     const formattedDate = formatDate(currentDate);
-    return mealData[formattedDate] || [];
+    return mealData ? mealData[formattedDate] || [] : null;
   };
   const getExerciseForSelectedDate = () => {
     const formattedDate = formatDate(currentDate);
-    return activityDataMounth[formattedDate] || [];
-  };
+    return activityDataMounth ? (activityDataMounth[formattedDate] || []) : null;
+  };  
   
   const calculateTotalCalories = (date: string) => {
     const formattedDate = typeof date === 'string' ? date : formatDate(date as Date);
-    const meals = mealData[formattedDate] || [];
-    return meals.reduce((total: number, meal) => total + meal.calories, 0);
+    const meals = mealData ? mealData[formattedDate] || [] : null;
+    return meals ? meals.reduce((total: number, meal) => total + meal.calories, 0) : 0;
   };
-
-  useEffect(() => {
-    const fetchNutritionGoals = async () => {
-      const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
-      try {
-        const token = Cookies.get('auth-token');
-        const res = await fetch(`${url}/api/nutritiongoeals?date=${formatDate(new Date())}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        const data = await res.json();
-        console.log("Fetched nutrition goals:", data);
-        setcurrentMacros(()=>{
-          return [
-            { name: 'Protein' , color: '#8884d8', goal: data.proteinTarget },
-            { name: 'Carbs', color: '#82ca9d', goal: data.carbTarget },
-            { name: 'Fat', color: '#ffc658', goal: data.fatTarget },
-          ]
-        })
-      } catch (err) {
-        console.error("Error fetching nutrition goals:", err);
-      }
-    };
-    fetchNutritionGoals();
-  },[])
   const navigateMonth = (direction: number) => {
     UpdateCalenderData(direction);
   };
@@ -215,6 +136,8 @@ const Dashboard = () => {
   }
   const calculateDayProgressCalories = () => {
     const todayMeals = getMealsForSelectedDate();
+    if(todayMeals == null) return null;
+
     const totalCalories = todayMeals.reduce((sum: number, meal) => sum + meal.calories, 0);
     const percentOfGoal = Math.min(Math.round((totalCalories / userData.dailyCalorieGoal) * 100), 100);
     return {
@@ -224,16 +147,23 @@ const Dashboard = () => {
     };
   };
   const calculateDayProgressExercices = () => {
-    const todayMeals = getExerciseForSelectedDate();
-    const totalMuniteExercices = todayMeals.reduce((sum: number, exercise:ExerciseData) => sum + exercise.minutes, 0);
+    const todayExercices = getExerciseForSelectedDate();
+    if(todayExercices == null) return 0;
+    const totalMuniteExercices = todayExercices.reduce((sum: number, exercise:ExerciseData) => sum + exercise.minutes, 0);
     return totalMuniteExercices;
   };
   const calculateDayMacro = () => {
-    const meals = mealData[formatDate(currentDate)] || [];
+    const meals = mealData ?  mealData[formatDate(currentDate)] || [] : null;
     let totalProtein = 0;
     let totalCarbs = 0;
     let totalFat = 0;
-    
+    if(!meals){
+      return {
+        Protein: 0,
+        Carbs: 0,
+        Fat: 0
+      };
+    }
     meals.forEach((meal) => {
       totalProtein += meal.protein || 0;
       totalCarbs += meal.carbs || 0;
@@ -278,17 +208,39 @@ const Dashboard = () => {
                 </button>
                 <button 
                   className={`py-3 px-6 flex items-center justify-center ${currentView === 'meals' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-                  onClick={() => setCurrentView('meals')}
+                  onClick={() => {
+                    mealData != null && setCurrentView('meals')
+                  }}
                 >
-                  <BarChart3 size={20} className="mr-2" />
-                  <span>Meals</span>
+                  <BarChart3 size={20} className={`mr-2 ${ mealData == null && 'text-red-800' }`} />
+                  {mealData == null ? (
+                    <span className="text-red-800 cursor-no-drop relative group">
+                      <span>Meals</span>
+                      <span className="absolute invisible group-hover:visible bg-red-700 text-white text-xs py-1 px-2 rounded top-9 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                      Meals data is not available
+                      </span>
+                    </span>
+                  ) : (
+                    <span>Meals</span>
+                  )}
                 </button>
                 <button 
                   className={`py-3 px-6 flex items-center justify-center ${currentView === 'weightTracking' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-                  onClick={() => setCurrentView('weightTracking')}
+                  onClick={() => {
+                    userData.weightHistory != null && setCurrentView('weightTracking')
+                  }}
                 >
-                  <Award size={20} className="mr-2" />
-                  <span>Log Weight</span>
+                  <Award size={20} className={`mr-2 ${ userData.weightHistory == null && 'text-red-800' }`} />
+                  {userData.weightHistory == null ? (
+                    <span className="text-red-800 cursor-no-drop relative group">
+                      <span>Log Weight</span>
+                      <span className="absolute invisible group-hover:visible bg-red-700 text-white text-xs py-1 px-2 rounded top-9 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                      Weight data is not available
+                      </span>
+                    </span>
+                  ) : (
+                    <span>Log Weight</span>
+                  )}
                 </button>
               </div>  
             </div>
@@ -297,8 +249,9 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <BlurFade delay={0.05} inView>
                           <SummaryCard
-                            caloriesConsumed={calculateDayProgressCalories().total}
+                            caloriesConsumed={calculateDayProgressCalories()?.total}
                             caloriesGoal={userData.dailyCalorieGoal}
+                            ExercisesAvalibale={activityData}
                             exerciseMinutes={calculateDayProgressExercices()}
                             exerciseGoal={60}
                             waterIntake={waterIntake}
@@ -329,10 +282,12 @@ const Dashboard = () => {
                   />
               
                 ) : (
-                  <AddWeight 
+                  <>
+                    <AddWeight 
                     datePicked={currentDate}
                     changeDate={ChangeDateAction}
                     />
+                  </>
                 )
               }
             </div>

@@ -4,6 +4,7 @@ import React from 'react';
 import { TrendingUp } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { MacroData } from '../types';
+import { TriangleAlert } from 'lucide-react';
 
 interface MacronutrientsCardProps {
   macros: MacroData[];
@@ -29,13 +30,17 @@ const MacronutrientsCard: React.FC<MacronutrientsCardProps> = ({ alldaysMelas , 
             <div className="flex justify-between text-sm">
               <span className="font-medium">{macro.name}</span>
               <span className="text-gray-500">
-                {macro.name=="Protein" ? alldaysMelas.Protein : macro.name=="Carbs" ? alldaysMelas.Carbs : alldaysMelas.Fat}g / {macro.goal}g</span>
+                {macro.name=="Protein" ? alldaysMelas.Protein : macro.name=="Carbs" ? alldaysMelas.Carbs : alldaysMelas.Fat}g / 
+                {macro.goal ?? (
+                  macro.name=="Protein" ? 120 : macro.name=="Carbs" ? 130 : 50
+                )}g</span>
             </div>
             <div className="w-full h-2 bg-gray-200 rounded-full">
                 <div 
                 className="h-2 rounded-full transition-all duration-1500 ease-in-out" 
                 style={{ 
-                  width: `${Math.min(((macro.name=="Protein" ? alldaysMelas.Protein : macro.name=="Carbs" ? alldaysMelas.Carbs : alldaysMelas.Fat) / macro.goal) * 100, 100)}%`,
+                  width: `${Math.min(((macro.name=="Protein" ? alldaysMelas.Protein : macro.name=="Carbs" ? alldaysMelas.Carbs : alldaysMelas.Fat) / 
+                  (macro.goal ?? macro.name=="Protein" ? 120 : macro.name=="Carbs" ? 130 : 50)) * 100, 100)}%`,
                   backgroundColor: macro.color 
                 }}
                 ></div>
@@ -45,10 +50,22 @@ const MacronutrientsCard: React.FC<MacronutrientsCardProps> = ({ alldaysMelas , 
         <div className="pt-4 mt-4 border-t border-gray-100">
           <div className="flex justify-between items-center">
             <div className="text-sm">
-              <p className="font-medium">Current Split</p>
-              <p className="text-gray-500">Based on today &apos;s intake</p>
+              {!macros && (
+                <TriangleAlert size={20} className="text-red-800" />
+              )  }
+            {!macros ? (
+              <>
+                <p className="font-medium text-red-800">Failed to to you golas statistics, so we replace is with a highet norm data </p>
+              </>
+            ) :
+            (
+              <>
+                <p className="font-medium">Current Split</p>
+                <p className="text-gray-500">Based on today &apos;s intake</p>
+              </>
+            ) }
             </div>  
-         
+
           </div>
         </div>
       </div>

@@ -48,14 +48,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         
         if (!dateExists) {
 
-          const meals = mealData[formattedDate] || [];
+          const meals = mealData ? mealData[formattedDate] || [] : null;
+
           const totalCalories = calculateTotalCalories(formattedDate);
-          const weightEntry = userData.weightHistory.find(entry => entry.date === formattedDate);
+          const weightEntry = userData.weightHistory ? userData.weightHistory.find(entry => entry.date === formattedDate) : null;
   
             days.push({
                 day: i ,
                 date: formattedDate,
-                mealCount: meals.length,
+                mealCount:  meals ?  meals.length : 0,
                 totalCalories,
                 weight: weightEntry?.weight,
                 isToday: formattedDate === formatDate(new Date())

@@ -50,7 +50,7 @@ const MealPanel = ({ currentDate, getMealsForSelectedDate ,UpdatealenderAfterSub
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.3 }}
             >
-              {getMealsForSelectedDate().length > 0 ? (
+              {getMealsForSelectedDate()?.length > 0 ? (
                 getMealsForSelectedDate().map(meal => (
                   <MealCard key={meal.id} meal={meal} onDelete={handleDeleteMeal} />
                 ))

@@ -3,6 +3,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ActivityData } from '../types';
+import { TriangleAlert } from 'lucide-react';
 
 interface ActivityCardProps {
   data: ActivityData[];
@@ -26,10 +27,27 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ data }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Weekly Activity</h2>
-        <button className="text-xs text-indigo-600 font-medium">Last 7 days</button>
+          <div className='flex items-center gap-1 justify-center'>
+            {data == null && <TriangleAlert size={20} className="text-red-800" />  }
+            <h2 className={`text-lg font-semibold ${data == null ? 'text-red-800' : 'text-gray-800' }`}>Weekly Activity</h2>
+          </div>
+          {data != null && <span className="text-xs text-gray-500">Last 7 days</span>} 
       </div>
-      
+      {data == null ? 
+          (
+            <div className="h-56 flex items-center justify-center">
+              <div className="text-center">
+            <p className="text-red-500 font-medium mb-2">Error fetching data</p>
+            <button 
+              className="px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+              </div>
+            </div>
+          )
+      : 
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
@@ -41,7 +59,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ data }) => {
           </BarChart>
         </ResponsiveContainer>
 
-      </div>
+      </div>}
     </div>
   );
 };
