@@ -10,13 +10,11 @@ export interface Meal {
     image_url:string,
     items: string[];
   }
-  export interface MealDataCalender {
-    [date: string]: Meal[];
-  }
+  export type MealDataCalender = Record<string, Meal[]>;
 
-  export interface ExericiseDataType {
-    [date: string]: ExerciseData[];  // #################################################################
-  }
+  export type ExericiseDataType = Record<string, ExerciseData[]>;
+  
+  
   export interface ExerciseData {
     exerciseType: string;
     minutes: string;
@@ -54,11 +52,11 @@ export interface Meal {
     calories: number;
   }
   
-  export interface MacroData {
+  export type Macro = {
     name: string;
     color: string;
     goal: number;
-  }
+  };
 
   export interface FoodItem {
   id: number;
@@ -92,9 +90,25 @@ export interface TypeSubmitionDataGoals {
 
 export interface  TypeNutritionGoal {
   dailyCalorieTarget: number;
-  proteinTarget: number;
+  proteinTarget: number
   carbTarget: number;
   fatTarget: number;
   startDate: string;
   endDate: string;
 };
+
+export interface ExerciseWeek {
+  "day": string,
+  "minutes": number,
+  "calories": number
+}
+
+export interface ActivityCardProps {
+  data: ActivityData[];
+}
+
+export interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: { calories: number; minutes: number } }>;
+  label?: string;
+}

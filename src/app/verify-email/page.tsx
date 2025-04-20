@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-function VerifyEmail() {
+function EmailVerificationContent() {
     const [verificationStatus, setVerificationStatus] = useState<{
         status?: number;
         message?: string;
@@ -71,6 +71,18 @@ function VerifyEmail() {
                 )}
             </div>
         </div>
+    );
+}
+
+function VerifyEmail() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="p-8 bg-white shadow-md rounded-lg">
+                <p>Loading...</p>
+            </div>
+        </div>}>
+            <EmailVerificationContent />
+        </Suspense>
     );
 }
 

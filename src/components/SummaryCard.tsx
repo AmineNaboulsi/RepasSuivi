@@ -3,8 +3,7 @@
 import React from 'react';
 import { Utensils, Activity, Droplet, TriangleAlert } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { BlurFade } from './magicui/blur-fade';
-import { ExericiseDataType } from '@/types';
+import { ExerciseWeek } from '@/types';
 
 interface SummaryCardProps {
   caloriesConsumed: number;
@@ -13,7 +12,7 @@ interface SummaryCardProps {
   exerciseGoal: number;
   waterIntake: number;
   waterGoal: number;
-  ExercisesAvalibale:ExericiseDataType[];
+  ExercisesAvalibale:ExerciseWeek[];
   setWaterIntake: (value: number) => void;
 }
 

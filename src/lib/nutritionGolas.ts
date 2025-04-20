@@ -11,7 +11,7 @@ export async function verifyNutritionGoals(token: string): Promise<'dashboard' |
       if (res.ok) return 'dashboard';
   
       return null;
-    } catch (error) {
+    } catch{
       return null;
     }
   }

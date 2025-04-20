@@ -1,14 +1,15 @@
-import { use, useEffect, useState } from "react";
+import { useState } from "react";
 import { AlertCircle, CalendarIcon, X } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import {motion } from 'framer-motion'
 import Cookies from 'js-cookie';
 import { TypeSubmitionDataGoals ,TypeNutritionGoal} from "@/types/index";
+import Image from "next/image";
 
 export default function NutritionPanelGoals({ setSubmitGolas }:TypeSubmitionDataGoals) {
   const [isFormOpen, setIsFormOpen] = useState(true);
   const [isloading, loading] = useState(false);
-  const [nutritionGoal, setNutritionGoal] = useState<TypeNutritionGoal>();
+  const [nutritionGoal] = useState<TypeNutritionGoal>();
   const [nutritionGoalStatus, setnutritionGoalStatus] = useState({
     status: true,
     message: "",
@@ -19,7 +20,14 @@ export default function NutritionPanelGoals({ setSubmitGolas }:TypeSubmitionData
     setSubmitGolas(true);
   };
   
-  const handleFormSubmit = async (data) => {
+  const handleFormSubmit = async (data: {
+    dailyCalorieTarget: number;
+    proteinTarget: number;
+    carbTarget: number;
+    fatTarget: number;
+    startDate: string;
+    endDate: string;
+  }) => {
     console.log("Submitting nutrition goals to backend:", data);
     const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
     try{
@@ -50,7 +58,7 @@ export default function NutritionPanelGoals({ setSubmitGolas }:TypeSubmitionData
       });
       setSubmitGolas(true);
 
-    }catch(err:any){
+    }catch(err){
       setnutritionGoalStatus({
         status: false,
         message: "Error submitting nutrition goals:" + err,
@@ -70,7 +78,7 @@ export default function NutritionPanelGoals({ setSubmitGolas }:TypeSubmitionData
               className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-4/5 overflow-hidden flex flex-col md:flex-row"
             >
               <div className="w-full md:w-1/2 h-64 md:h-full order-1 md:order-2 relative overflow-hidden">
-                <img 
+                <Image 
                   src="./images/nutrionsimg.jpg" 
                   alt="Nutrition" 
                   className="w-full h-full object-cover" 
@@ -95,13 +103,14 @@ export default function NutritionPanelGoals({ setSubmitGolas }:TypeSubmitionData
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   
+                  const form = e.target as HTMLFormElement;
                   const formData = {
-                    dailyCalorieTarget: Number(e.target?.dailyCalorieTarget.value || ""),
-                    proteinTarget: Number(e.target?.proteinTarget.value || ""),
-                    carbTarget: Number(e.target?.carbTarget.value || ""),
-                    fatTarget: Number(e.target?.fatTarget.value || ""),
-                    startDate: e.target?.startDate.value || new Date().toISOString().split('T')[0],
-                    endDate: e.target?.endDate.value || new Date().toISOString().split('T')[0],
+                    dailyCalorieTarget: Number((form.elements.namedItem('dailyCalorieTarget') as HTMLInputElement)?.value || ""),
+                    proteinTarget: Number((form.elements.namedItem('proteinTarget') as HTMLInputElement)?.value || ""),
+                    carbTarget: Number((form.elements.namedItem('carbTarget') as HTMLInputElement)?.value || ""),
+                    fatTarget: Number((form.elements.namedItem('fatTarget') as HTMLInputElement)?.value || ""),
+                    startDate: (form.elements.namedItem('startDate') as HTMLInputElement)?.value || new Date().toISOString().split('T')[0],
+                    endDate: (form.elements.namedItem('endDate') as HTMLInputElement)?.value || new Date().toISOString().split('T')[0],
                   };
                   
                   handleFormSubmit(formData);

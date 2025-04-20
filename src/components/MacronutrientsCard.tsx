@@ -2,12 +2,11 @@
 
 import React from 'react';
 import { TrendingUp } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { MacroData } from '../types';
+import { Macro } from '../types';
 import { TriangleAlert } from 'lucide-react';
 
 interface MacronutrientsCardProps {
-  macros: MacroData[];
+  macros: Macro[];
   alldaysMelas : {
       Protein: number,
       Carbs: number,

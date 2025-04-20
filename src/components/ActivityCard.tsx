@@ -2,14 +2,10 @@
 
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { ActivityData } from '../types';
 import { TriangleAlert } from 'lucide-react';
+import {TooltipProps , ActivityCardProps} from '@/types/index'
 
-interface ActivityCardProps {
-  data: ActivityData[];
-}
-
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip: React.FC<TooltipProps> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const { calories, minutes } = payload[0].payload;
     return (

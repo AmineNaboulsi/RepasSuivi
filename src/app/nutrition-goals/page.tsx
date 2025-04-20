@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import NutritionPanelGoals from '@/components/NutritionPanelGoals';
 import { useRouter } from 'next/navigation';
 export default function NutritionGoalsPage() {

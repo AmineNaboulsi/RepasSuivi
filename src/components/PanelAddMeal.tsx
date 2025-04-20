@@ -53,7 +53,7 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
 
   const addFoodToMeal = (food: FoodItem) => {
     const exists = selectedFoods.some(item => item.id === food.id) 
-    !exists && setSelectedFoods([...selectedFoods, { ...food, quantity: 1 }]);
+    if(!exists) setSelectedFoods([...selectedFoods, { ...food, quantity: 1 }]);
     setSearchTerm('');
   };
 
@@ -66,7 +66,7 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
       food.id === foodId ? { ...food, quantity: Math.max(1, quantity) } : food
     ));
   };
-  const handleDragEnd = (foodId: number, info:any) => {
+  const handleDragEnd = (foodId: number, info: { offset: { x: number } }) => {
     if (info.offset.x < -100) { 
       removeFoodFromMeal(foodId);
     }

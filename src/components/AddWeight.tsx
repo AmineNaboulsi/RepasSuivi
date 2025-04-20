@@ -33,7 +33,11 @@ const AddWeight = ({datePicked , changeDate  }: typeAddWeightProps) => {
       });
       
       const data = await res.json();
-      data && data.length > 0 ? setPreviousWeight(data[0].weight) : setPreviousWeight(null);
+      if (data && data.length > 0) {
+        setPreviousWeight(data[0].weight);
+      } else {
+        setPreviousWeight(null);
+      }
       setNotes(data[0]?.note ?? '');
       setLoading(false);
     } catch (error) {

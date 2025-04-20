@@ -44,7 +44,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     for (let i = 1; i <= daysInMonth; i++) {
         const date = new Date(year, month, i);
         const formattedDate = formatDate(date);
-        const dateExists = days.some((item:DayType) => item?.date === formattedDate);
+        const dateExists = days?.some((item:(DayType | null)) => item?.date === formattedDate);
         
         if (!dateExists) {
 

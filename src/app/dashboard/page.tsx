@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Calendar, BarChart3, Award } from 'lucide-react';
 import CalendarView from '@/components/CalendarView';
 import SummaryCard from '@/components/SummaryCard';
@@ -11,170 +11,180 @@ import Cookies from 'js-cookie'
 import AddWeight from '@/components/AddWeight'
 import MealPanel from '@/components/MealPanel';
 import { BlurFade } from "@/components/magicui/blur-fade";
-import { ExericiseDataType , ExerciseData , DayType, UserData, NutritionData ,MealDataCalender} from '@/types/index';
+import { 
+  ExericiseDataType , 
+  DayType, 
+  UserData, 
+  NutritionData ,
+  MealDataCalender , 
+  ExerciseWeek,
+  Macro
+} from '@/types/index';
 
-
-type ExerciseWeek = {
-  "day": string,
-  "minutes": number,
-  "calories": number
-}
 const Dashboard = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [isLoadingCalender, setLoadingCalender] = useState<boolean>(true);
-  const [mealData, setmealData] = useState<MealDataCalender>({});
+  const [isLoadingCalender, setLoadingCalender] = useState(true);
+  const [mealData, setMealData] = useState<MealDataCalender>({});
   const [currentView, setCurrentView] = useState('overview');
+  const [nutritionData, setNutritionData] = useState<NutritionData[]>([]);
+  const [activityData, setActivityData] = useState<ExerciseWeek[]>([]);
+  const [activityDataMonth, setActivityDataMonth] = useState<ExericiseDataType>({});
   const [waterIntake, setWaterIntake] = useState(5);
-  const [nutritionData , setnutritionData] = useState<NutritionData[]>([]);
-  const [activityData , setactivityData] = useState<ExerciseWeek[]>([]);
-  const [activityDataMounth , setactivityDataMounth] = useState<ExericiseDataType[]>([]);
-  const [currentMacros, setcurrentMacros] = useState([
+  const [currentMacros, setCurrentMacros] = useState<Macro[]>([
     { name: 'Protein', color: '#8884d8', goal: 120 },
     { name: 'Carbs', color: '#82ca9d', goal: 130 },
     { name: 'Fat', color: '#ffc658', goal: 50 },
   ]);
-  // const [ResetCalenderAction, setResetCalenderAction] = useState<boolean>(false);
-  const [userData, setuserData] = useState<UserData>({
-      name: "UserGuest65249",
-      dailyCalorieGoal: 2100,
-      weightHistory: [],
+  const [userData, setUserData] = useState<UserData>({
+    name: 'UserGuest65249',
+    dailyCalorieGoal: 2100,
+    weightHistory: [],
   });
-  const waterGoal = 8;
 
-  const fetchstatistics = async(date) => {
+  const fetchStatistics = async (date: Date) => {
     const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
-    const FDate = date.toISOString().split("T")[0]; 
-    try{
-      const ressponse = await fetch(`${url}/api/statistics?date=${FDate}`,{
-        method: "GET" ,
-        headers: { 
-          'Content-Type': 'application/json' ,
-          'Authorization': `Bearer ${Cookies.get('auth-token')}`
+    const formattedDate = date.toISOString().split('T')[0];
+    try {
+      const response = await fetch(`${url}/api/statistics?date=${formattedDate}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${Cookies.get('auth-token')}`,
         },
       });
-      const Exercises = await ressponse.json();
-      Exercises.forEach((Servicedata : {name : string , data : any})=>{
-          Servicedata.name == "exercises" ? 
-          setactivityDataMounth(Servicedata.data) : 
-          Servicedata.name == "exercises-week" ? 
-          setactivityData(Servicedata.data) : 
-          Servicedata.name == "caloroystrend" ? 
-          setnutritionData(Servicedata.data) : 
-          Servicedata.name == "nutritiongoeals" ? 
-          setcurrentMacros(()=>{
-            return [
-              { name: 'Protein' , color: '#8884d8', goal: Servicedata.data?.proteinTarget },
-              { name: 'Carbs', color: '#82ca9d', goal: Servicedata.data?.carbTarget },
-              { name: 'Fat', color: '#ffc658', goal: Servicedata.data?.fatTarget },
-            ]
-          }) : 
-          Servicedata.name == "weight-records" ? 
-            setuserData((prev)=>({
-              ...prev ,
-              weightHistory : Servicedata.data
-            }
-            )): 
-          Servicedata.name == "meals" &&
-          setmealData(Servicedata.data);
-      })
-    }catch{
-      //
+      const services = await response.json();
+      services.forEach((service: {
+        name: string;
+        data:
+          | ExericiseDataType
+          | ExerciseWeek[]
+          | NutritionData[]
+          | MealDataCalender
+          | Record<string, ExericiseDataType>
+          | unknown;
+      }) => {
+          switch (service.name) {
+            case 'exercises':
+              if (typeof service.data === 'object' && !Array.isArray(service.data)) {
+                setActivityDataMonth(service.data as ExericiseDataType);
+              }
+              break;
+            case 'exercises-week':
+              if (Array.isArray(service.data)) {
+                setActivityData(service.data as ExerciseWeek[]);
+              }
+              break;
+            case 'caloroystrend':
+              if (Array.isArray(service.data)) {
+                setNutritionData(service.data as NutritionData[]);
+              }
+              break;
+            case 'nutritiongoeals':
+              const nutritionGoals = service.data as {
+                proteinTarget: number;
+                carbTarget: number;
+                fatTarget: number;
+              };
+              if (nutritionGoals?.proteinTarget !== undefined) {
+                setCurrentMacros([
+                  { name: 'Protein', color: '#8884d8', goal: nutritionGoals.proteinTarget },
+                  { name: 'Carbs', color: '#82ca9d', goal: nutritionGoals.carbTarget },
+                  { name: 'Fat', color: '#ffc658', goal: nutritionGoals.fatTarget },
+                ]);
+              }
+              break;
+            case 'weight-records':
+              if (Array.isArray(service.data)) {
+                setUserData(prev => (
+                  { ...prev, weightHistory: service.data as { date: string; weight: number; }[] } 
+                ));
+              }
+              break;
+            case 'meals':
+              setMealData(service.data as MealDataCalender);
+              break;  
+            default:
+              break;
+          }
+      });
+    } catch (error) {
+      console.error('Failed to fetch statistics:', error);
     }
-  }
-  const fetchCalenderData = React.useCallback(async (date:Date)=>{
-    setLoadingCalender(true)
-    await fetchstatistics(date)
-    setLoadingCalender(false)
-  }, [/*fetMeals, fetWeightRecords*/])
+  };
+  const ChangeDateAction = (newDate: Date) => {
+    console.log("Date Changed:", newDate);
+  };
+  const fetchCalendarData = useCallback(async (date: Date) => {
+    setLoadingCalender(true);
+    await fetchStatistics(date);
+    setLoadingCalender(false);
+  }, []);
 
-  useEffect(()=>{
-    fetchCalenderData(new Date())
-  },[fetchCalenderData])
-  
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
+  useEffect(() => {
+    fetchCalendarData(new Date());
+  }, [fetchCalendarData]);
+
+  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+  const getMealsForSelectedDate = () => mealData?.[formatDate(currentDate)] ?? [];
+
+  const getExerciseForSelectedDate = () => activityDataMonth?.[formatDate(currentDate)] ?? [];
+
+  const calculateTotalCalories = (date: string | Date) => {
+    const formattedDate = typeof date === 'string' ? date : formatDate(date);
+    const meals = mealData?.[formattedDate] ?? [];
+    return meals.reduce((total: number, meal) => total + (meal?.calories ?? 0), 0);
   };
   
-  const getMealsForSelectedDate = () => {
-    const formattedDate = formatDate(currentDate);
-    return mealData ? mealData[formattedDate] || [] : null;
-  };
-  const getExerciseForSelectedDate = () => {
-    const formattedDate = formatDate(currentDate);
-    return activityDataMounth ? (activityDataMounth[formattedDate] || []) : null;
-  };  
-  
-  const calculateTotalCalories = (date: string) => {
-    const formattedDate = typeof date === 'string' ? date : formatDate(date as Date);
-    const meals = mealData ? mealData[formattedDate] || [] : null;
-    return meals ? meals.reduce((total: number, meal) => total + meal.calories, 0) : 0;
-  };
+
   const navigateMonth = (direction: number) => {
-    UpdateCalenderData(direction);
-  };
-
-  const UpdateCalenderData = (direction:number)=>{
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + direction);
     setCurrentDate(newDate);
-    fetchCalenderData(newDate)
-  }
+    fetchCalendarData(newDate);
+  };
 
   const selectDate = (day: DayType) => {
     if (day) {
       const newDate = new Date(day.date);
       setCurrentDate(newDate);
-      ChangeDateAction(newDate);
+      console.log('Date Changed:', newDate);
     }
   };
-  const ChangeDateAction = (newDate: Date) => {
-    console.log("Date Changed:", newDate);
 
+  const updateCalendarAfterSubmit = () => {
+    fetchCalendarData(currentDate);
   };
-  const UpdatealenderAfterSubmit = () =>{
-    UpdateCalenderData(0)
-  }
-  const calculateDayProgressCalories = () => {
-    const todayMeals = getMealsForSelectedDate();
-    if(todayMeals == null) return null;
 
-    const totalCalories = todayMeals.reduce((sum: number, meal) => sum + meal.calories, 0);
-    const percentOfGoal = Math.min(Math.round((totalCalories / userData.dailyCalorieGoal) * 100), 100);
+  const calculateDayProgressCalories = () => {
+    const meals = getMealsForSelectedDate();
+    const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
+    const percent = Math.min(Math.round((totalCalories / userData.dailyCalorieGoal) * 100), 100);
     return {
       total: totalCalories,
-      percent: percentOfGoal,
-      remaining: userData.dailyCalorieGoal - totalCalories
+      percent,
+      remaining: userData.dailyCalorieGoal - totalCalories,
     };
   };
-  const calculateDayProgressExercices = () => {
-    const todayExercices = getExerciseForSelectedDate();
-    if(todayExercices == null) return 0;
-    const totalMuniteExercices = todayExercices.reduce((sum: number, exercise:ExerciseData) => sum + exercise.minutes, 0);
-    return totalMuniteExercices;
+
+  const calculateDayProgressExercises = () => {
+    const exercises = getExerciseForSelectedDate();
+    console.log("Exercises for selected date:", exercises);
+    return 0;
+    // return exercises.reduce((sum: number, ex: ExerciseData) => sum + (ex?.minutes ?? 0), 0);
   };
+
   const calculateDayMacro = () => {
-    const meals = mealData ?  mealData[formatDate(currentDate)] || [] : null;
-    let totalProtein = 0;
-    let totalCarbs = 0;
-    let totalFat = 0;
-    if(!meals){
-      return {
-        Protein: 0,
-        Carbs: 0,
-        Fat: 0
-      };
-    }
-    meals.forEach((meal) => {
-      totalProtein += meal.protein || 0;
-      totalCarbs += meal.carbs || 0;
-      totalFat += meal.fat || 0;
-    });
-    
-    return {
-      Protein: totalProtein,
-      Carbs: totalCarbs,
-      Fat: totalFat
-    };
+    const meals = mealData[formatDate(currentDate)] || [];
+    return meals.reduce(
+      (totals, meal) => {
+        totals.Protein += meal.protein || 0;
+        totals.Carbs += meal.carbs || 0;
+        totals.Fat += meal.fat || 0;
+        return totals;
+      },
+      { Protein: 0, Carbs: 0, Fat: 0 }
+    );
   };
 
   return (
@@ -209,7 +219,7 @@ const Dashboard = () => {
                 <button 
                   className={`py-3 px-6 flex items-center justify-center ${currentView === 'meals' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
                   onClick={() => {
-                    mealData != null && setCurrentView('meals')
+                    if(mealData != null) setCurrentView('meals')
                   }}
                 >
                   <BarChart3 size={20} className={`mr-2 ${ mealData == null && 'text-red-800' }`} />
@@ -227,7 +237,9 @@ const Dashboard = () => {
                 <button 
                   className={`py-3 px-6 flex items-center justify-center ${currentView === 'weightTracking' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
                   onClick={() => {
-                    userData.weightHistory != null && setCurrentView('weightTracking')
+                    if (userData.weightHistory != null) {
+                      setCurrentView('weightTracking');
+                    }
                   }}
                 >
                   <Award size={20} className={`mr-2 ${ userData.weightHistory == null && 'text-red-800' }`} />
@@ -252,10 +264,10 @@ const Dashboard = () => {
                             caloriesConsumed={calculateDayProgressCalories()?.total}
                             caloriesGoal={userData.dailyCalorieGoal}
                             ExercisesAvalibale={activityData}
-                            exerciseMinutes={calculateDayProgressExercices()}
+                            exerciseMinutes={calculateDayProgressExercises()}
                             exerciseGoal={60}
                             waterIntake={waterIntake}
-                            waterGoal={waterGoal}
+                            waterGoal={8}
                             setWaterIntake={setWaterIntake}
                           />
                       </BlurFade>
@@ -278,7 +290,7 @@ const Dashboard = () => {
                   <MealPanel
                   currentDate={currentDate}
                   getMealsForSelectedDate={getMealsForSelectedDate} 
-                  UpdatealenderAfterSubmit={UpdatealenderAfterSubmit}
+                  UpdatealenderAfterSubmit={updateCalendarAfterSubmit}
                   />
               
                 ) : (
