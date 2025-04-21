@@ -35,7 +35,7 @@ export interface Meal {
     weightHistory: {
       date: string;
       weight: number;
-    }[];
+    }[] | null;
   }
   
   export interface NutritionData {

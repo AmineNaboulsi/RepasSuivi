@@ -75,15 +75,22 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       <div className="flex justify-between items-center mb-4">
 
         <button 
-          onClick={() => navigateMonth(-1)}
-          className="p-1 rounded-full hover:bg-gray-100"
+          onClick={() => {
+            if(!isLoading)
+              navigateMonth(-1)
+            } 
+          }
+          className={`p-1 rounded-full ${!isLoading && 'hover:bg-gray-100'}`}
         >
           <ChevronLeft size={20} />
         </button>
         <h2 className="text-lg font-semibold">{monthName}</h2>
         <button 
-          onClick={() => navigateMonth(1)}
-          className="p-1 rounded-full hover:bg-gray-100"
+          onClick={() => {
+            if(!isLoading)
+              navigateMonth(1)
+          }}
+          className={`p-1 rounded-full ${!isLoading && 'hover:bg-gray-100'}`}
         >
           <ChevronRight size={20} />
         </button>

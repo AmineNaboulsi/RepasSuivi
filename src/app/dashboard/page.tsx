@@ -10,7 +10,6 @@ import ActivityCard from '@/components/ActivityCard';
 import Cookies from 'js-cookie'
 import AddWeight from '@/components/AddWeight'
 import MealPanel from '@/components/MealPanel';
-import { BlurFade } from "@/components/magicui/blur-fade";
 import { 
   ExericiseDataType , 
   DayType, 
@@ -18,7 +17,8 @@ import {
   NutritionData ,
   MealDataCalender , 
   ExerciseWeek,
-  Macro
+  Macro,
+  ExerciseData
 } from '@/types/index';
 
 const Dashboard = () => {
@@ -26,10 +26,12 @@ const Dashboard = () => {
   const [isLoadingCalender, setLoadingCalender] = useState(true);
   const [mealData, setMealData] = useState<MealDataCalender>({});
   const [currentView, setCurrentView] = useState('overview');
-  const [nutritionData, setNutritionData] = useState<NutritionData[]>([]);
-  const [activityData, setActivityData] = useState<ExerciseWeek[]>([]);
-  const [activityDataMonth, setActivityDataMonth] = useState<ExericiseDataType>({});
+  const [nutritionData, setNutritionData] = useState<NutritionData[] | null>([]);
+  const [activityData, setActivityData] = useState<ExerciseWeek[] | null>([]);
+  const [activityDataMonth, setActivityDataMonth] = useState<ExericiseDataType | null>({});
   const [waterIntake, setWaterIntake] = useState(5);
+  const [LodingStatistics, setLodingStatistics] = useState(true);
+  const [LodingNewWeekExercices, setLodingNewWeekExercices] = useState(false);
   const [currentMacros, setCurrentMacros] = useState<Macro[]>([
     { name: 'Protein', color: '#8884d8', goal: 120 },
     { name: 'Carbs', color: '#82ca9d', goal: 130 },
@@ -42,6 +44,7 @@ const Dashboard = () => {
   });
 
   const fetchStatistics = async (date: Date) => {
+    setLodingStatistics(true);
     const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
     const formattedDate = date.toISOString().split('T')[0];
     try {
@@ -67,17 +70,19 @@ const Dashboard = () => {
             case 'exercises':
               if (typeof service.data === 'object' && !Array.isArray(service.data)) {
                 setActivityDataMonth(service.data as ExericiseDataType);
-              }
+              }else setActivityDataMonth(null);
+              
               break;
             case 'exercises-week':
               if (Array.isArray(service.data)) {
                 setActivityData(service.data as ExerciseWeek[]);
-              }
+              }else setActivityData(null);
+              console.log("Activity data exercises-week : ", service.data);
               break;
             case 'caloroystrend':
               if (Array.isArray(service.data)) {
-                setNutritionData(service.data as NutritionData[]);
-              }
+                setNutritionData(service.data as NutritionData[] | null);
+              }else setNutritionData(null);
               break;
             case 'nutritiongoeals':
               const nutritionGoals = service.data as {
@@ -99,6 +104,11 @@ const Dashboard = () => {
                   { ...prev, weightHistory: service.data as { date: string; weight: number; }[] } 
                 ));
               }
+              else {
+                setUserData(prev => (
+                  { ...prev, weightHistory: null } 
+                ));
+              }
               break;
             case 'meals':
               setMealData(service.data as MealDataCalender);
@@ -107,13 +117,17 @@ const Dashboard = () => {
               break;
           }
       });
+      setLodingStatistics(false);
     } catch (error) {
+      setLodingStatistics(false);
       console.error('Failed to fetch statistics:', error);
     }
   };
+
   const ChangeDateAction = (newDate: Date) => {
     console.log("Date Changed:", newDate);
   };
+  
   const fetchCalendarData = useCallback(async (date: Date) => {
     setLoadingCalender(true);
     await fetchStatistics(date);
@@ -148,10 +162,32 @@ const Dashboard = () => {
     if (day) {
       const newDate = new Date(day.date);
       setCurrentDate(newDate);
-      console.log('Date Changed:', newDate);
+      FetchNewExerceisWekk(newDate);
     }
   };
+  const FetchNewExerceisWekk = async ( date:Date) => {
+    setLodingNewWeekExercices(true);
+    const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
+    const FDate = date.toISOString().split("T")[0]; 
+    try{
+      const response = await fetch(`${url}/api/exercises?f=week&date=${FDate}`,{
+        method: "GET" ,
+        headers: { 
+          'Content-Type': 'application/json' ,
+          'Authorization': `Bearer ${Cookies.get('auth-token')}`
+        },
+      });
+      const data = await response.json();
+      console.log({
+        exercise :  data
+      })
+      setActivityData(data);
+      setLodingNewWeekExercices(false)
+    }catch{
+      setLodingNewWeekExercices(false)
+    }
 
+  };
   const updateCalendarAfterSubmit = () => {
     fetchCalendarData(currentDate);
   };
@@ -169,14 +205,13 @@ const Dashboard = () => {
 
   const calculateDayProgressExercises = () => {
     const exercises = getExerciseForSelectedDate();
-    console.log("Exercises for selected date:", exercises);
-    return 0;
-    // return exercises.reduce((sum: number, ex: ExerciseData) => sum + (ex?.minutes ?? 0), 0);
+    return Array.isArray(exercises) ? exercises.reduce((sum: number, ex: ExerciseData) => sum + (Number(ex?.minutes) || 0), 0) : 0;
   };
 
   const calculateDayMacro = () => {
-    const meals = mealData[formatDate(currentDate)] || [];
-    return meals.reduce(
+    const meals = mealData ? mealData[formatDate(currentDate)] || [] : null;
+    if(!meals) return currentMacros;
+    return meals ? meals?.reduce(
       (totals, meal) => {
         totals.Protein += meal.protein || 0;
         totals.Carbs += meal.carbs || 0;
@@ -184,7 +219,7 @@ const Dashboard = () => {
         return totals;
       },
       { Protein: 0, Carbs: 0, Fat: 0 }
-    );
+    ) : { Protein: 0, Carbs: 0, Fat: 0 };
   };
 
   return (
@@ -206,60 +241,63 @@ const Dashboard = () => {
             </div>
             
             <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-lg shadow mb-6">
-              <div className="flex justify-center">
-                <button 
-                  className={`py-3 px-6 flex items-center justify-center ${currentView === 'overview' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-                  onClick={() => setCurrentView('overview')}
-                >
-                  <Calendar size={20} className="mr-2" />
-                  
-                  <span>Overview</span>
-                </button>
-                <button 
-                  className={`py-3 px-6 flex items-center justify-center ${currentView === 'meals' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-                  onClick={() => {
-                    if(mealData != null) setCurrentView('meals')
-                  }}
-                >
-                  <BarChart3 size={20} className={`mr-2 ${ mealData == null && 'text-red-800' }`} />
-                  {mealData == null ? (
-                    <span className="text-red-800 cursor-no-drop relative group">
-                      <span>Meals</span>
-                      <span className="absolute invisible group-hover:visible bg-red-700 text-white text-xs py-1 px-2 rounded top-9 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                      Meals data is not available
-                      </span>
-                    </span>
-                  ) : (
-                    <span>Meals</span>
-                  )}
-                </button>
-                <button 
-                  className={`py-3 px-6 flex items-center justify-center ${currentView === 'weightTracking' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-                  onClick={() => {
-                    if (userData.weightHistory != null) {
-                      setCurrentView('weightTracking');
-                    }
-                  }}
-                >
-                  <Award size={20} className={`mr-2 ${ userData.weightHistory == null && 'text-red-800' }`} />
-                  {userData.weightHistory == null ? (
-                    <span className="text-red-800 cursor-no-drop relative group">
-                      <span>Log Weight</span>
-                      <span className="absolute invisible group-hover:visible bg-red-700 text-white text-xs py-1 px-2 rounded top-9 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                      Weight data is not available
-                      </span>
-                    </span>
-                  ) : (
-                    <span>Log Weight</span>
-                  )}
-                </button>
-              </div>  
+            <div className={`bg-white rounded-lg shadow mb-6 ${ LodingStatistics && 'animate-pulse'}`}>
+                {!LodingStatistics &&
+                (
+                  <div className="flex justify-center">
+                    <button 
+                      className={`py-3 px-6 flex items-center justify-center ${currentView === 'overview' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
+                      onClick={() => setCurrentView('overview')}
+                    >
+                      <Calendar size={20} className="mr-2" />
+                      
+                      <span>Overview</span>
+                    </button>
+                    <button 
+                      className={`py-3 px-6 flex items-center justify-center ${currentView === 'meals' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
+                      onClick={() => {
+                        if(mealData != null) setCurrentView('meals')
+                      }}
+                    >
+                      <BarChart3 size={20} className={`mr-2 ${ mealData == null && 'text-red-800' }`} />
+                      {mealData == null ? (
+                        <span className="text-red-800 cursor-no-drop relative group">
+                          <span>Meals</span>
+                          <span className="absolute invisible group-hover:visible bg-red-700 text-white text-xs py-1 px-2 rounded top-9 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                          Meals data is not available
+                          </span>
+                        </span>
+                      ) : (
+                        <span>Meals</span>
+                      )}
+                    </button>
+                    <button 
+                      className={`py-3 px-6 flex items-center justify-center ${currentView === 'weightTracking' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
+                      onClick={() => {
+                        if (userData.weightHistory != null) {
+                          setCurrentView('weightTracking');
+                        }
+                      }}
+                    >
+                      <Award size={20} className={`mr-2 ${ userData.weightHistory == null && 'text-red-800' }`} />
+                      {userData.weightHistory == null ? (
+                        <span className="text-red-800 cursor-no-drop relative group">
+                          <span>Log Weight</span>
+                          <span className="absolute invisible group-hover:visible bg-red-700 text-white text-xs py-1 px-2 rounded top-9 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                          Weight data is not available
+                          </span>
+                        </span>
+                      ) : (
+                        <span>Log Weight</span>
+                      )}
+                    </button>
+                  </div>  
+                )
+                }
             </div>
               {
                 currentView === 'overview' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <BlurFade delay={0.05} inView>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-screen">
                           <SummaryCard
                             caloriesConsumed={calculateDayProgressCalories()?.total}
                             caloriesGoal={userData.dailyCalorieGoal}
@@ -269,20 +307,21 @@ const Dashboard = () => {
                             waterIntake={waterIntake}
                             waterGoal={8}
                             setWaterIntake={setWaterIntake}
+                            LodingStatistics={LodingStatistics}
                           />
-                      </BlurFade>
 
-                      <BlurFade delay={0.15} inView>
-                        <MacronutrientsCard alldaysMelas={calculateDayMacro()} macros={currentMacros} />
-                      </BlurFade>
+                        <MacronutrientsCard 
+                            LodingStatistics={LodingStatistics}
+                            alldaysMelas={calculateDayMacro() as {
+                              Protein: number,
+                              Carbs: number,
+                              Fat: number
+                          }} 
+                            macros={currentMacros} />
 
-                      <BlurFade delay={0.25} inView>
-                        <CaloriesTrendCard data={nutritionData} />
-                      </BlurFade>
+                        <CaloriesTrendCard LodingStatistics={LodingStatistics} data={nutritionData} />
 
-                      <BlurFade delay={0.35} inView>
-                          <ActivityCard data={activityData} />
-                      </BlurFade>
+                        <ActivityCard LodingNewWeekExercices={LodingNewWeekExercices} currentDate={currentDate} LodingStatistics={LodingStatistics} data={activityData} />
 
                   </div>
                 ) : 
