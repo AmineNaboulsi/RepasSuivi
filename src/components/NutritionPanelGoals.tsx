@@ -79,8 +79,10 @@ export default function NutritionPanelGoals({ setSubmitGolas }:TypeSubmitionData
             >
               <div className="w-full md:w-1/2 h-64 md:h-full order-1 md:order-2 relative overflow-hidden">
                 <Image 
-                  src="./images/nutrionsimg.jpg" 
-                  alt="Nutrition" 
+                  src="/images/nutrionsimg.jpg" 
+                  alt="Nutrition"
+                  width={500}
+                  height={500}
                   className="w-full h-full object-cover" 
                 />
                 

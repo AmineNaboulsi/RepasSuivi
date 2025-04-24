@@ -6,7 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChevronRight, Menu } from "lucide-react";
 import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner"
-
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 export default function DashboardLayout({
   children,
 }: {
@@ -14,7 +15,11 @@ export default function DashboardLayout({
 }) {
   const [queryClient] = useState(() => new QueryClient());
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
-
+  const router = useRouter();
+  const HandleLogout = () => {
+    Cookies.remove('auth-token');
+    router.push('/auth/login');
+  }
   return (
     <AuthGuard>
       <QueryClientProvider client={queryClient}>
@@ -34,11 +39,8 @@ export default function DashboardLayout({
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                  <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    My Profile
-                  </button>
                   <button 
-                    onClick={() => {/* Add logout function here */}}
+                    onClick={HandleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Logout

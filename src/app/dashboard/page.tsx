@@ -23,6 +23,8 @@ import {
   ExerciseData
 } from '@/types/index';
 
+import confetti from 'canvas-confetti';
+
 const Dashboard = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoadingCalender, setLoadingCalender] = useState(true);
@@ -45,7 +47,47 @@ const Dashboard = () => {
     weightHistory: [],
   });
   
+  const triggerLeftParticles = () => {
+    confetti({
+      particleCount: 100,
+      spread: 60,
+      origin: { x: 0.1, y: 0.5 }, 
+      angle: 60,
+      colors: ['#22c55e', '#3b82f6', '#f59e0b']
+    });
+  };
+
+  const triggerRightParticles = () => {
+    confetti({
+      particleCount: 100,
+      spread: 60,
+      origin: { x: 0.9, y: 0.5 },
+      angle: 120,
+      colors: ['#ec4899', '#8b5cf6', '#06b6d4']
+    });
+  };
+
+
   useEffect(() => {
+    const celebrateGoalCompletion = () => {
+      triggerLeftParticles();
+      triggerRightParticles();
+      
+      setTimeout(() => {
+        triggerLeftParticles();
+        triggerRightParticles();
+      }, 700);
+
+      setTimeout(() => {
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { x: 0.5, y: 0.7 },
+          colors: ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6']
+        });
+      }, 1400);
+    };
+
     const url = process.env.NEXT_PUBLIC_URLNotiFICATION_SERVER;
     const ws = new WebSocket(`${url}`);
     
@@ -55,8 +97,23 @@ const Dashboard = () => {
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      toast(data?.message)
+      celebrateGoalCompletion();
+      if (data?.message) {
+        toast.custom(() => (
+          <div className="flex items-center px-4 py-3 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg shadow-lg">
+            <div className="mr-3 bg-white rounded-full p-2">
+              <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="text-white font-medium">{data?.message}</div>
+          </div>
+        ));
+      } else {
+        toast(data?.message);
+      }
     };
+    
     
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
@@ -70,6 +127,7 @@ const Dashboard = () => {
       ws.close();
     };
   }, []);
+
   const fetchStatistics = async (date: Date) => {
     setLodingStatistics(true);
     const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
@@ -113,10 +171,14 @@ const Dashboard = () => {
               break;
             case 'nutritiongoeals':
               const nutritionGoals = service.data as {
+                dailyCalorieTarget: number;
                 proteinTarget: number;
                 carbTarget: number;
                 fatTarget: number;
               };
+              setUserData(prev => (
+                { ...prev, dailyCalorieGoal: nutritionGoals.dailyCalorieTarget, } 
+              ));
               if (nutritionGoals?.proteinTarget !== undefined) {
                 setCurrentMacros([
                   { name: 'Protein', color: '#8884d8', goal: nutritionGoals.proteinTarget },
