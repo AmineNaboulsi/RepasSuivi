@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChevronRight, Menu } from "lucide-react";
 import { useState } from "react";
+import { Toaster } from "@/components/ui/sonner"
 
 export default function DashboardLayout({
   children,
@@ -17,6 +18,7 @@ export default function DashboardLayout({
   return (
     <AuthGuard>
       <QueryClientProvider client={queryClient}>
+        <Toaster />
         <div className="bg-gray-100  p-4">
           <header className="bg-white shadow rounded-lg p-4 flex justify-between items-center">
             <div className="flex items-center space-x-2">

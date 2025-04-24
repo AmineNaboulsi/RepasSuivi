@@ -10,6 +10,8 @@ import ActivityCard from '@/components/ActivityCard';
 import Cookies from 'js-cookie'
 import AddWeight from '@/components/AddWeight'
 import MealPanel from '@/components/MealPanel';
+import { toast } from "sonner"
+
 import { 
   ExericiseDataType , 
   DayType, 
@@ -42,7 +44,32 @@ const Dashboard = () => {
     dailyCalorieGoal: 2100,
     weightHistory: [],
   });
-
+  
+  useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_URLNotiFICATION_SERVER;
+    const ws = new WebSocket(`${url}`);
+    
+    ws.onopen = () => {
+      console.log('Connected to notification server');
+    };
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      toast(data?.message)
+    };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+    ws.onclose = () => {
+      console.log('Disconnected from notification server');
+    };
+    
+    return () => {
+      ws.close();
+    };
+  }, []);
   const fetchStatistics = async (date: Date) => {
     setLodingStatistics(true);
     const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
@@ -225,7 +252,6 @@ const Dashboard = () => {
   return (
     <div className="bg-gray-100 min-h-screen ">
         <div className="container mx-auto px-4">
-       
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
             <div className="lg:col-span-1 space-y-6 relative">
               <CalendarView 
