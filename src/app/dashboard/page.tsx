@@ -116,7 +116,7 @@ const Dashboard = () => {
     
     
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.log('WebSocket error:', error);
     };
     
     ws.onclose = () => {

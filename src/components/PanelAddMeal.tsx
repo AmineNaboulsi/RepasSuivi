@@ -272,9 +272,7 @@ const PanelAddMeal = ({ currentDate, setShowForm, UpdatealenderAfterSubmit }: Ty
                   onChange={(e) => updateFoodUnite(food.id, e.target.value)}
                 >
                   <option value="g">g</option>
-                  <option value="kg">kg</option>
                   <option value="ml">ml</option>
-                  <option value="l">l</option>
                   <option value="piece">piece</option>
                 </select>
               </div>
