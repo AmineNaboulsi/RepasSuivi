@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-// import ReCAPTCHA from "react-google-recaptcha";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Eye, EyeOff, Mail, User, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import Cookies from 'js-cookie'
 
@@ -35,15 +35,15 @@ const RegisterPage = () => {
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
-  // const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  // const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   
-  // const handleCaptchaChange = (token: string | null) => {
-  //   // setCaptchaToken(token);
-  //   if (errors.captcha) {
-  //     setErrors(prev => ({ ...prev, captcha: undefined }));
-  //   }
-  // };
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
+    if (errors.captcha) {
+      setErrors(prev => ({ ...prev, captcha: undefined }));
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -81,9 +81,9 @@ const RegisterPage = () => {
       newErrors.terms = 'You must agree to the Terms and Conditions';
     }
     
-    // if (!captchaToken) {
-    //   newErrors.captcha = 'Please complete the reCAPTCHA';
-    // }
+    if (!captchaToken) {
+      newErrors.captcha = 'Please complete the reCAPTCHA';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -296,11 +296,11 @@ const RegisterPage = () => {
             </div>
             
             <div className="flex justify-center">
-              {/* <ReCAPTCHA
+              <ReCAPTCHA
                 sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
                 onChange={handleCaptchaChange}
                 ref={recaptchaRef}
-                /> */}
+                />
             </div>
             {errors.captcha && <p className="mt-1 text-sm text-center text-red-600">{errors.captcha}</p>}
             
