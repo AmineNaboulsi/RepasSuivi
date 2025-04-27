@@ -127,7 +127,7 @@ const RegisterPage = () => {
     }
   };
 
-  return 
+  return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Left section (illustration) for larger screens */}
       <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-indigo-300 to-purple-600 p-12 justify-center items-center">
@@ -327,7 +327,7 @@ const RegisterPage = () => {
         </div>
       </div>
     </div>
-  ;
+  );
 };
 
 export default RegisterPage;
