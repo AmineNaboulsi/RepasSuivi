@@ -36,6 +36,7 @@ const Dashboard = () => {
   const [waterIntake, setWaterIntake] = useState(5);
   const [LodingStatistics, setLodingStatistics] = useState(true);
   const [LodingNewWeekExercices, setLodingNewWeekExercices] = useState(false);
+  const [LodingNewCaloroysTrend, setLodingNewCaloroysTrend] = useState(false);
   const [currentMacros, setCurrentMacros] = useState<Macro[]>([
     { name: 'Protein', color: '#8884d8', goal: 120 },
     { name: 'Carbs', color: '#82ca9d', goal: 130 },
@@ -252,8 +253,10 @@ const Dashboard = () => {
       const newDate = new Date(day.date);
       setCurrentDate(newDate);
       FetchNewExerceisWekk(newDate);
+      FetchNewCaloroysTrend(newDate);
     }
   };
+
   const FetchNewExerceisWekk = async ( date:Date) => {
     setLodingNewWeekExercices(true);
     const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
@@ -277,6 +280,31 @@ const Dashboard = () => {
     }
 
   };
+
+  const FetchNewCaloroysTrend = async ( date:Date) => {
+    setLodingNewCaloroysTrend(true);
+    const url = process.env.NEXT_PUBLIC_URLAPI_GETWAY;
+    const FDate = date.toISOString().split("T")[0]; 
+    try{
+      const response = await fetch(`${url}/api/getcaloroystrend?date=${FDate}`,{
+        method: "GET" ,
+        headers: { 
+          'Content-Type': 'application/json' ,
+          'Authorization': `Bearer ${Cookies.get('auth-token')}`
+        },
+      });
+      const data = await response.json();
+      console.log({
+        exercise :  data
+      })
+      setNutritionData(data);
+      setLodingNewCaloroysTrend(false)
+    }catch{
+      setLodingNewWeekExercices(false)
+    }
+
+  };
+
   const updateCalendarAfterSubmit = () => {
     fetchCalendarData(currentDate);
   };
