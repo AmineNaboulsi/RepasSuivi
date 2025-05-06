@@ -80,38 +80,6 @@ export default function Home() {
                   En savoir plus
                 </button>
               </div>
-              
-              <div className="mt-8 flex items-center">
-                <div className="flex -space-x-2">
-                  <Image
-                      src="/images/imgaccount1.jpg"
-                      alt="account"
-                      className="w-14 h-10 rounded-full border-2 border-white object-contain"
-                      width={500}
-                      height={500}
-                    />
-                  <Image
-                      src="/images/imgaccount2.jpg"
-                      alt="account"
-                      className="w-14 h-10 rounded-full border-2 border-white object-contain"
-                      width={500}
-                      height={500}
-                    />
-                      <Image
-                      src="/images/imgaccount3.jpg"
-                      alt="account"
-                      className="w-14 h-10 rounded-full border-2 border-white object-contain"
-                      width={500}
-                      height={500}
-                    />
-                  <div className="w-24 h-10 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-medium text-indigo-600">
-                    +5k
-                  </div>
-                </div>
-                <p className="ml-4 text-sm text-gray-600">
-                  Rejoignez plus de <span className="font-semibold text-indigo-600">5,000</span> utilisateurs qui transforment leurs habitudes alimentaires
-                </p>
-              </div>
             </div>
             
             <div className={`w-full lg:w-1/2 transition-all duration-1000 delay-300 ${isAnimated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
