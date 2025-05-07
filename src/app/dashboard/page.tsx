@@ -88,7 +88,7 @@ const Dashboard = () => {
         });
       }, 1400);
     };
-
+    
     const url = process.env.NEXT_PUBLIC_URLNotiFICATION_SERVER;
     const ws = new WebSocket(`${url}`);
     
@@ -435,7 +435,9 @@ const Dashboard = () => {
                           }} 
                             macros={currentMacros} />
 
-                        <CaloriesTrendCard LodingStatistics={LodingStatistics} data={nutritionData} />
+                        <CaloriesTrendCard 
+                        LodingNewCaloroysTrend={LodingNewCaloroysTrend}
+                        LodingStatistics={LodingStatistics} data={nutritionData} />
 
                         <ActivityCard LodingNewWeekExercices={LodingNewWeekExercices} currentDate={currentDate} LodingStatistics={LodingStatistics} data={activityData} />
 

@@ -9,6 +9,7 @@ import { BlurFade } from './magicui/blur-fade';
 interface CaloriesTrendCardProps {
   data: NutritionData[] | null;
   LodingStatistics?: boolean;
+  LodingNewCaloroysTrend?: boolean;
 }
 
 const CaloriesTrendCard: React.FC<CaloriesTrendCardProps> = ({ data , LodingStatistics}) => {
